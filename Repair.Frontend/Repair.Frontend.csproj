@@ -51,7 +51,7 @@
   </ItemGroup>
 
 <ItemGroup>
-  <Compile Update="Presentation\**\*.*.cs">
+  <Compile Update="**\*.cs">
     <DependentUpon>$([System.String]::Copy('%(Filename)').Split('.')[0]).cs</DependentUpon>
   </Compile>
 </ItemGroup>

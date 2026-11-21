@@ -5,7 +5,7 @@ namespace Repair.Frontend.Services;
 
 public class TrialService
 {
-    private const bool USE_TRIAL_SERVICE = true;
+    private const bool USE_TRIAL_SERVICE = false;
 
     private static readonly DateTime TrialEndDate = new(2026, 7, 4);
     private static readonly DateTime TrialExpirationDate = TrialEndDate.AddDays(1);
