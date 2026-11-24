@@ -16,6 +16,7 @@
     <Deploy />
   </Project>
   <Project Path="Repair.Abstractions/Repair.Abstractions.csproj" />
+  <Project Path="Repair.Api/Repair.Api.csproj" Id="d1fab928-dc4d-4b8e-9fc4-6f929a8b88ca" />
   <Project Path="Repair.Frontend/Repair.Frontend.csproj">
     <Deploy />
   </Project>

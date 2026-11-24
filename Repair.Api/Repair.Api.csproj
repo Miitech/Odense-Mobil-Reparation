@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Repair.Abstractions\Repair.Abstractions.csproj" />
+    <ProjectReference Include="..\Repair.Models\Repair.Models.csproj" />
+    <ProjectReference Include="..\Repair.Persistence\Repair.Persistence.csproj" />
+    <ProjectReference Include="..\Repair.Services\Repair.Services.csproj" />
+    <ProjectReference Include="..\Repair.Startup\Repair.Startup.csproj" />
+  </ItemGroup>
+
+</Project>
