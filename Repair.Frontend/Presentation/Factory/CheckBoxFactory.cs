@@ -12,8 +12,9 @@ internal static class CheckBoxFactory
             Foreground = new SolidColorBrush(Colors.Black),
             Margin = new Thickness(4),
             MinHeight = 32,
-            Template = CreateLightCheckBoxTemplate(),
         };
+
+        checkBox.Template(_ => CreateLightCheckBoxTemplate());
 
         checkBox.SetBinding(ToggleButton.IsCheckedProperty, new Binding
         {
@@ -42,17 +43,14 @@ internal static class CheckBoxFactory
         return grid;
     }
 
-    private static ControlTemplate CreateLightCheckBoxTemplate()
+    private static Border CreateLightCheckBoxTemplate()
     {
-        return new ControlTemplate(() =>
-        {
-            Border box = CreateCheckBoxBorder();
+        Border box = CreateCheckBoxBorder();
 
-            TextBlock checkMark = CreateCheckMark();
-            box.Child = checkMark;
+        TextBlock checkMark = CreateCheckMark();
+        box.Child = checkMark;
 
-            return box;
-        });
+        return box;
     }
 
     private static Border CreateCheckBoxBorder()
@@ -67,7 +65,7 @@ internal static class CheckBoxFactory
             CornerRadius = new CornerRadius(4),
         };
 
-        border.SetBinding(FrameworkElement.BackgroundProperty, CreateCheckedBackgroundBinding());
+        border.SetBinding(Border.BackgroundProperty, CreateCheckedBackgroundBinding());
         border.SetBinding(Border.BorderBrushProperty, CreateCheckedBorderBrushBinding());
 
         return border;

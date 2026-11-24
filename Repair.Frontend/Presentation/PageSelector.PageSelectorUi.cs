@@ -137,7 +137,6 @@ namespace Repair.Frontend.Presentation
                     Background = new SolidColorBrush(Colors.Transparent),
                     SelectionMode = ListViewSelectionMode.None,
                     ItemsSource = regions,
-                    ItemTemplate = CreateMenuItemTemplate(),
                     ItemContainerStyle = CreateMenuItemStyle(),
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Top,
@@ -145,51 +144,59 @@ namespace Repair.Frontend.Presentation
                     IsItemClickEnabled = true,
                 };
 
+                menuList.ItemTemplate<IPageRegion>(_ => CreateMenuItemTemplate());
+
                 menuList.ItemClick += Logic.MenuListItemClicked;
 
                 return menuList;
             }
 
-            private DataTemplate CreateMenuItemTemplate()
+            private Grid CreateMenuItemTemplate()
             {
-                return new DataTemplate(() =>
+                Grid templateGrid = GridFactory.CreateDefaultGrid();
+                templateGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
+                templateGrid.Margin = new Thickness(0);
+
+                templateGrid.ColumnDefinitions.Add(new ColumnDefinition
                 {
-                    Grid templateGrid = GridFactory.CreateDefaultGrid();
-                    templateGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
-                    templateGrid.Margin = new Thickness(0);
-
-                    templateGrid.ColumnDefinitions.Add(new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    });
-                    templateGrid.ColumnDefinitions.Add(new ColumnDefinition
-                        {Width = new GridLength(1, GridUnitType.Star),});
-
-                    var iconPresenter = new ContentPresenter
-                    {
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                    };
-                    iconPresenter.SetBinding(ContentPresenter.ContentProperty,
-                        new Binding {Path = new PropertyPath(nameof(IPageRegion.Icon)),});
-
-                    var text = new TextBlock
-                    {
-                        Foreground = new SolidColorBrush(Colors.White),
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        Margin = new Thickness(5, 0, 0, 0),
-                        TextWrapping = TextWrapping.NoWrap,
-                        TextTrimming = TextTrimming.CharacterEllipsis,
-                    };
-                    text.SetBinding(TextBlock.TextProperty,
-                        new Binding {Path = new PropertyPath(nameof(IPageRegion.DisplayName)),});
-
-                    templateGrid.Children.Add(iconPresenter.SetColumn(0));
-                    templateGrid.Children.Add(text.SetColumn(1));
-
-                    return templateGrid;
+                    Width = GridLength.Auto,
                 });
+
+                templateGrid.ColumnDefinitions.Add(new ColumnDefinition
+                {
+                    Width = new GridLength(1, GridUnitType.Star),
+                });
+
+                var iconPresenter = new ContentPresenter
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                };
+
+                iconPresenter.SetBinding(ContentPresenter.ContentProperty, new Binding
+                {
+                    Path = new PropertyPath(nameof(IPageRegion.Icon)),
+                });
+
+                var text = new TextBlock
+                {
+                    Foreground = new SolidColorBrush(Colors.White),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Margin = new Thickness(5, 0, 0, 0),
+                    TextWrapping = TextWrapping.NoWrap,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                };
+
+                text.SetBinding(TextBlock.TextProperty, new Binding
+                {
+                    Path = new PropertyPath(nameof(IPageRegion.DisplayName)),
+                });
+
+                templateGrid.Children.Add(iconPresenter.SetColumn(0));
+                templateGrid.Children.Add(text.SetColumn(1));
+
+                return templateGrid;
             }
 
             private Style CreateMenuItemStyle()

@@ -16,9 +16,10 @@ internal static class TextBoxFactory
             BorderBrush = new SolidColorBrush(Colors.Black),
             Margin = new Thickness(4),
             MinHeight = 56,
-            Template = CreateLightTextBoxTemplate(),
             VerticalAlignment = VerticalAlignment.Center,
         };
+
+        textBox.Template(_ => CreateLightTextBoxTemplate());
 
         textBox.SetBinding(TextBox.TextProperty, new Binding
         {
@@ -41,21 +42,18 @@ internal static class TextBoxFactory
         return textBox;
     }
 
-    private static ControlTemplate CreateLightTextBoxTemplate()
+    private static Grid CreateLightTextBoxTemplate()
     {
-        return new ControlTemplate(() =>
-        {
-            Grid grid = CreateTemplateGrid();
-            TextBlock header = CreateHeaderTextBlock();
-            Border border = CreateInputBorder();
+        Grid grid = CreateTemplateGrid();
+        TextBlock header = CreateHeaderTextBlock();
+        Border border = CreateInputBorder();
 
-            border.Child = CreateInputGrid();
+        border.Child = CreateInputGrid();
 
-            grid.Children.Add(header);
-            grid.Children.Add(border.SetRow(1));
+        grid.Children.Add(header);
+        grid.Children.Add(border.SetRow(1));
 
-            return grid;
-        });
+        return grid;
     }
 
     private static Grid CreateTemplateGrid()

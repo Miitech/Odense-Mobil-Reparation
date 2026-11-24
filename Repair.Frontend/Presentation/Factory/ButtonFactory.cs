@@ -24,7 +24,7 @@ namespace Repair.Frontend.Presentation.Factory
 
         public static RadioButton CreateNullableBooleanOptionButton(string text)
         {
-            return new RadioButton
+            RadioButton button = new()
             {
                 Content = text,
                 Foreground = new SolidColorBrush(Colors.Black),
@@ -34,26 +34,26 @@ namespace Repair.Frontend.Presentation.Factory
                 VerticalContentAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(0),
                 Padding = new Thickness(0),
-                Template = CreateNullableBooleanOptionButtonTemplate(),
             };
+
+            return button.Template(_ => CreateNullableBooleanOptionButtonTemplate());
         }
 
-        private static ControlTemplate CreateNullableBooleanOptionButtonTemplate()
+        private static Border CreateNullableBooleanOptionButtonTemplate()
         {
-            return new ControlTemplate(() =>
+            Border border = CreateNullableBooleanOptionButtonBorder();
+
+            ContentPresenter content = new()
             {
-                Border border = CreateNullableBooleanOptionButtonBorder();
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+            };
 
-                ContentPresenter content = new()
-                {
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                };
+            content.SetBinding(ContentPresenter.ContentProperty, CreateTemplateBinding(nameof(ContentControl.Content)));
 
-                border.Child = content;
+            border.Child = content;
 
-                return border;
-            });
+            return border;
         }
 
         private static Border CreateNullableBooleanOptionButtonBorder()
@@ -66,7 +66,7 @@ namespace Repair.Frontend.Presentation.Factory
                 Padding = new Thickness(8, 0, 8, 0),
             };
 
-            border.SetBinding(FrameworkElement.BackgroundProperty, CreateCheckedBackgroundBinding());
+            border.SetBinding(Border.BackgroundProperty, CreateCheckedBackgroundBinding());
             border.SetBinding(Border.BorderBrushProperty, CreateCheckedBorderBrushBinding());
 
             return border;
