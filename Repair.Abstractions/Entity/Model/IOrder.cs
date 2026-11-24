@@ -1,15 +1,10 @@
+using Repair.Abstractions.Entity.Data;
 using Repair.Abstractions.Entity.Searchable;
 using Repair.Abstractions.Persistence;
 
 namespace Repair.Abstractions.Entity.Model;
 
-public interface IOrder : ISearchableOrder, IEntity
+public interface IOrder : ISearchableOrder, IEntity, IOrderData
 {
-    DateTime HandInWhen { get; set; }
-
-    DateTime? ReturnedWhen { get; set; }
-
-    bool IsOrderComplete { get; set; }
-
     ICustomer Customer { get; set; }
 }
