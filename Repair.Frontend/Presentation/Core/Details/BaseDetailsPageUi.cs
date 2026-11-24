@@ -7,7 +7,7 @@ internal abstract class BaseDetailsPageUi<TLogic, TViewModel>(TLogic logic, TVie
     : BaseUi<TLogic, TViewModel>(logic, viewModel) where TLogic : BaseDetailsPageLogic<TViewModel>
     where TViewModel : BaseDetailsPageViewModel
 {
-    protected Grid CreateDetailsButtonsGrid(params UIElement[] leftButtons)
+    protected Grid CreateDetailsButtonsGrid(params FrameworkElement[] leftButtons)
     {
         var columns = leftButtons.Select(_ => GridLength.Auto).Prepend(GridLength.Auto)
             .Append(new GridLength(1, GridUnitType.Star)).Append(GridLength.Auto).Append(GridLength.Auto)

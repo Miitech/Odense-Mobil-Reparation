@@ -26,12 +26,12 @@ internal sealed partial class CustomersPage
             grid.Children.Add(CreateCustomersGrid().SetRow(1));
         }
 
-        private UIElement CreateButtonGrid()
+        private FrameworkElement CreateButtonGrid()
         {
             return SimplePieceFactory.CreateLeftButtonGrid("Create Customer", Logic.CreateCustomerClicked);
         }
 
-        private UIElement CreateHeader()
+        private FrameworkElement CreateHeader()
         {
             return TextBlockFactory.CreateHeader("Customers");
         }

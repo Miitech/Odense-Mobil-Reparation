@@ -25,7 +25,7 @@ internal sealed partial class OrderCreationPage
             grid.Children.Add(CreateOrderEditor().SetRow(1));
         }
 
-        private UIElement CreateHeader()
+        private FrameworkElement CreateHeader()
         {
             return TextBlockFactory.CreateHeader("Create order");
         }

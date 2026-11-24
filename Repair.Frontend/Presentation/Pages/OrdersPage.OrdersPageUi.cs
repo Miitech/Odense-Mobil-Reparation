@@ -30,7 +30,7 @@ internal sealed partial class OrdersPage
             return SimplePieceFactory.CreateLeftButtonGrid("Create Order", Logic.CreateOrderClicked);
         }
 
-        private UIElement CreateHeader()
+        private FrameworkElement CreateHeader()
         {
             return TextBlockFactory.CreateHeader("Orders");
         }

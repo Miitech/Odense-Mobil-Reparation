@@ -28,7 +28,7 @@ internal sealed partial class CustomerCreationPage
             grid.Children.Add(CreateCustomerEditor().SetRow(1));
         }
 
-        private UIElement CreateHeader()
+        private FrameworkElement CreateHeader()
         {
             return TextBlockFactory.CreateHeader("Create customer");
         }
