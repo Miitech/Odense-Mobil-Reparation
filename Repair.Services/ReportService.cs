@@ -6,7 +6,6 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using Repair.Abstractions.Entity.Model;
 using Repair.Abstractions.Services;
-using Repair.Models.Entity.Model;
 using Repair.Models.Settings;
 
 namespace Repair.Services;
@@ -45,48 +44,52 @@ public class ReportService(
 
     public Task<string> CreateReport(ICustomer customer)
     {
-        try
+        return Task.FromResult(SaveAndOpenReport(GenerateReport(customer)));
+    }
+
+    public GeneratedReport GenerateReport(ICustomer customer)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+
+        return GenerateReport(CreateReportFileName(customer), column =>
         {
-            ArgumentNullException.ThrowIfNull(customer);
+            AddCustomerDetails(column, customer);
+            AddCustomerOrders(column, customer);
+        });
+    }
 
-            QuestPDF.Settings.License = LicenseType.Community;
+    private GeneratedReport GenerateReport(string fileName, Action<ColumnDescriptor> addDetails)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
 
-            string reportFolder = Path.Combine(configurationService.GetApplicationDataPath(), REPORT_FOLDER_NAME);
-
-            Directory.CreateDirectory(reportFolder);
-
-            string filePath = Path.Combine(reportFolder, CreateReportFileName(customer));
-
-            Document.Create(container =>
+        byte[] content = Document.Create(container =>
+        {
+            container.Page(page =>
             {
-                container.Page(page =>
+                page.Size(PageSizes.A4);
+                page.Margin(40);
+                page.DefaultTextStyle(x => x.FontSize(11));
+                page.Content().Column(column =>
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(40);
-                    page.DefaultTextStyle(x => x.FontSize(11));
-
-                    page.Content().Column(column =>
-                    {
-                        column.Spacing(25);
-
-                        AddCompanyDetails(column);
-                        AddCustomerDetails(column, customer);
-                        AddCustomerOrders(column, customer);
-                    });
+                    column.Spacing(25);
+                    AddCompanyDetails(column);
+                    addDetails(column);
                 });
-            }).GeneratePdf(filePath);
-            OpenReportInDefaultViewer(filePath);
+            });
+        }).GeneratePdf();
 
-            logger.LogInformation("Created report for customer '{CustomerId}' at {ReportPath}", customer.Id, filePath);
+        logger.LogInformation("Generated report '{FileName}'.", fileName);
+        return new GeneratedReport(fileName, content);
+    }
 
-            return Task.FromResult(filePath);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Caught exception while trying to create a Report for Customer '{CustomerId}'.",
-                customer.Id);
-            throw;
-        }
+    private string SaveAndOpenReport(GeneratedReport report)
+    {
+        string folder = Path.Combine(configurationService.GetApplicationDataPath(), REPORT_FOLDER_NAME);
+        Directory.CreateDirectory(folder);
+        string filePath = Path.Combine(folder, report.FileName);
+        File.WriteAllBytes(filePath, report.Content);
+        OpenReportInDefaultViewer(filePath);
+        return filePath;
     }
 
     private void OpenReportInDefaultViewer(string filePath)
@@ -130,47 +133,18 @@ public class ReportService(
     /// <inheritdoc />
     public Task<string> CreateReport(IOrder order)
     {
-        try
+        return Task.FromResult(SaveAndOpenReport(GenerateReport(order)));
+    }
+
+    public GeneratedReport GenerateReport(IOrder order)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+
+        return GenerateReport(CreateReportFileName(order), column =>
         {
-            ArgumentNullException.ThrowIfNull(order);
-
-            QuestPDF.Settings.License = LicenseType.Community;
-
-            string reportFolder = Path.Combine(configurationService.GetApplicationDataPath(), REPORT_FOLDER_NAME);
-
-            Directory.CreateDirectory(reportFolder);
-
-            string filePath = Path.Combine(reportFolder, CreateReportFileName(order));
-
-            Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(40);
-                    page.DefaultTextStyle(x => x.FontSize(11));
-
-                    page.Content().Column(column =>
-                    {
-                        column.Spacing(25);
-
-                        AddCompanyDetails(column);
-                        AddCustomerDetails(column, order.Customer);
-                        AddOrderDetails(column, order);
-                    });
-                });
-            }).GeneratePdf(filePath);
-            OpenReportInDefaultViewer(filePath);
-
-            logger.LogInformation("Created report for order '{OrderId}' at {ReportPath}", order.Id, filePath);
-
-            return Task.FromResult(filePath);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Caught exception while trying to create a Report for Order '{OrderId}'.", order.Id);
-            throw;
-        }
+            AddCustomerDetails(column, order.Customer);
+            AddOrderDetails(column, order);
+        });
     }
 
     private string CreateReportFileName(IOrder order)
