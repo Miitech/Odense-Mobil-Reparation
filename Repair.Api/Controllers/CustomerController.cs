@@ -55,10 +55,4 @@ public class CustomerController : EntityController<
             Email = entity.Email,
         };
     }
-
-    protected override bool HasMatchingVersion(
-        Customer entity, UpdateCustomerDto dto)
-    {
-        return entity.Version.SequenceEqual(dto.Version);
-    }
 }

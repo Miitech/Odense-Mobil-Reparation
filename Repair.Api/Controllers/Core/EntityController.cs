@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repair.Abstractions.Persistence;
+using Repair.Abstractions.Dto;
 
 namespace Repair.Api.Controllers.Core;
 
@@ -17,9 +18,9 @@ public abstract class EntityController<
     where TEntity : class, IEntity
     where TSearchable : class, ISearchable, new()
     where TComplexSearchable : class, IComplexSearchable<TSearchable>
-    where TAddDto : class
-    where TUpdateDto : class
-    where TGetDto : class
+    where TAddDto : class, IAddDto
+    where TUpdateDto : class, IUpdateDto
+    where TGetDto : class, IGetDto
     where TController : ControllerBase
 {
     protected readonly IEntityQueryService<TEntity, TSearchable> queryService;
@@ -39,7 +40,10 @@ public abstract class EntityController<
 
     protected abstract TGetDto CreateGetDto(TEntity entity);
 
-    protected abstract bool HasMatchingVersion(TEntity entity, TUpdateDto dto);
+    protected virtual bool HasMatchingVersion(TEntity entity, TUpdateDto dto)
+    {
+        return entity.Version.SequenceEqual(dto.Version);
+    }
 
     [HttpGet("{id:int:min(1)}")]
     public virtual async Task<ActionResult<TGetDto>> GetSingle(int id)

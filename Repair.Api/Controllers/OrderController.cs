@@ -127,9 +127,4 @@ public class OrderController : EntityController<
             },
         };
     }
-
-    protected override bool HasMatchingVersion(Order entity, UpdateOrderDto dto)
-    {
-        return entity.Version.SequenceEqual(dto.Version);
-    }
 }
