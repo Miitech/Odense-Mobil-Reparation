@@ -1,9 +1,10 @@
-using Repair.Abstractions.Persistence;
+using Repair.Models.Dto.Add;
+using Repair.Models.Dto.Get;
+using Repair.Models.Api;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Pieces;
 using Repair.Frontend.Services;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -12,13 +13,13 @@ internal sealed partial class CustomerCreationPage
 {
     private sealed class CustomerCreationPageLogic : BaseLogic<CustomerCreationPageViewModel>
     {
-        private readonly IEntityQueryService<Customer, SearchableCustomer> queryService;
+        private readonly ICustomerApi customerApi;
         private readonly INavigationService navigationService;
         private readonly ILogger<CustomerCreationPageLogic> logger;
 
         public CustomerCreationPageLogic(CustomerCreationPageViewModel viewModel) : base(viewModel)
         {
-            queryService = ViewModel.Arguments.CustomerQueryService;
+            customerApi = ViewModel.Arguments.CustomerApi;
             navigationService = ViewModel.Arguments.NavigationService;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<CustomerCreationPageLogic>();
         }
@@ -33,8 +34,7 @@ internal sealed partial class CustomerCreationPage
                     return;
                 }
 
-                Customer newCustomer = BuildNewCustomer();
-                await queryService.AddEntity(newCustomer);
+                GetCustomerDto newCustomer = await customerApi.AddSingle(BuildNewCustomer());
                 logger.LogInformation("Created customer {CustomerId}.", newCustomer.Id);
 
                 CustomerDetailsPage.CustomerDetailsPageArguments arguments =
@@ -57,9 +57,9 @@ internal sealed partial class CustomerCreationPage
                    !string.IsNullOrWhiteSpace(customer.Email) && customer.Email.Count(x => x == '@') == 1;
         }
 
-        private Customer BuildNewCustomer()
+        private AddCustomerDto BuildNewCustomer()
         {
-            return new Customer
+            return new AddCustomerDto
             {
                 Name = ViewModel.CustomerEditor.ViewModel.Name,
                 Phone = ViewModel.CustomerEditor.ViewModel.Phone,

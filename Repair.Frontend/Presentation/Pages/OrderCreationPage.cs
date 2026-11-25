@@ -1,7 +1,6 @@
-using Repair.Abstractions.Persistence;
+using Repair.Models.Api;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Factory;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -24,7 +23,7 @@ internal sealed partial class OrderCreationPage : Border
     }
 
     internal sealed record OrderCreationPageArguments(
-        IEntityQueryService<Order, SearchableOrder> OrderQueryService,
+        IOrderApi OrderApi,
         INavigationService NavigationService,
         ILoggerFactory LoggerFactory,
         int SelectedCustomerId = 0);

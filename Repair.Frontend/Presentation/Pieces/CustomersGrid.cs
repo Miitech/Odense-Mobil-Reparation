@@ -1,8 +1,7 @@
+using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Factory;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pieces;
@@ -29,7 +28,7 @@ internal sealed partial class CustomersGrid : Border, INavigationRefreshable
     private CustomersGridLogic Logic { get; set; }
 
     internal record CustomersGridArguments(
-        IEntityQueryService<Customer, SearchableCustomer> QueryService,
+        ICustomerApi CustomerApi,
         IUiDispatcher UiDispatcher,
         ILoggerFactory LoggerFactory,
         int SelectedCustomerId = 0)

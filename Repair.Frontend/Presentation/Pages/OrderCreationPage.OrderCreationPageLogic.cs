@@ -1,9 +1,10 @@
-using Repair.Abstractions.Persistence;
+using Repair.Models.Dto.Add;
+using Repair.Models.Dto.Get;
+using Repair.Models.Api;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Pieces;
 using Repair.Frontend.Services;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -12,13 +13,13 @@ internal sealed partial class OrderCreationPage
 {
     private sealed class OrderCreationPageLogic : BaseLogic<OrderCreationPageViewModel>
     {
-        private readonly IEntityQueryService<Order, SearchableOrder> queryService;
+        private readonly IOrderApi orderApi;
         private readonly INavigationService navigationService;
         private readonly ILogger<OrderCreationPageLogic> logger;
 
         public OrderCreationPageLogic(OrderCreationPageViewModel viewModel) : base(viewModel)
         {
-            queryService = ViewModel.Arguments.OrderQueryService;
+            orderApi = ViewModel.Arguments.OrderApi;
             navigationService = ViewModel.Arguments.NavigationService;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<OrderCreationPageLogic>();
         }
@@ -33,8 +34,7 @@ internal sealed partial class OrderCreationPage
                     return;
                 }
 
-                Order newOrder = BuildNewOrder();
-                await queryService.AddEntity(newOrder);
+                GetOrderDto newOrder = await orderApi.AddSingle(BuildNewOrder());
                 logger.LogInformation("Created order {OrderId} for customer {CustomerId}.", newOrder.Id,
                     newOrder.CustomerId);
 
@@ -60,11 +60,11 @@ internal sealed partial class OrderCreationPage
                    GetSelectedCustomerId() > 0;
         }
 
-        private Order BuildNewOrder()
+        private AddOrderDto BuildNewOrder()
         {
             OrderEditor.OrderEditorViewModel orderEditorViewModel = ViewModel.OrderEditor.ViewModel;
 
-            return new Order
+            return new AddOrderDto
             {
                 HandInWhen = orderEditorViewModel.HandInWhenPicker.ViewModel.SelectedDateTime!.Value,
                 ReturnedWhen = orderEditorViewModel.ReturnedWhenPicker.ViewModel.SelectedDateTime,
@@ -78,7 +78,7 @@ internal sealed partial class OrderCreationPage
 
         private int GetSelectedCustomerId()
         {
-            if (ViewModel.OrderEditor.ViewModel.CustomersGrid.ViewModel.DataGrid.SelectedItem is not Customer customer)
+            if (ViewModel.OrderEditor.ViewModel.CustomersGrid.ViewModel.DataGrid.SelectedItem is not GetCustomerDto customer)
             {
                 return 0;
             }

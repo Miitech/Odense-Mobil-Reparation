@@ -1,9 +1,11 @@
+using Repair.Frontend.Services;
+using Repair.Models.Dto.Update;
+using Repair.Models.Dto.Get;
+using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Core.Details;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -12,20 +14,20 @@ internal sealed partial class OrderDetailsPage
 {
     internal sealed class OrderDetailsPageLogic : BaseDetailsPageLogic<OrderDetailsPageViewModel>
     {
-        private readonly IEntityQueryService<Order, SearchableOrder> queryService;
+        private readonly IOrderApi orderApi;
         private readonly IUiDispatcher uiDispatcher;
         private readonly ILogger<OrderDetailsPageLogic> logger;
 
         public OrderDetailsPageLogic(OrderDetailsPageViewModel viewModel) : base(viewModel)
         {
-            queryService = ViewModel.Arguments.OrderQueryService;
+            orderApi = ViewModel.Arguments.OrderApi;
             uiDispatcher = ViewModel.Arguments.UiDispatcher;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<OrderDetailsPageLogic>();
         }
 
         internal async Task RefreshOrder()
         {
-            Order? order = await queryService.GetEntity(CreateSearchableOrder());
+            GetOrderDto order = await orderApi.GetSingle(ViewModel.Arguments.OrderId);
 
             if (order is null)
             {
@@ -38,11 +40,6 @@ internal sealed partial class OrderDetailsPage
                 ApplyOrderToEditor();
                 UpdateHasChanges();
             });
-        }
-
-        private SearchableOrder CreateSearchableOrder()
-        {
-            return new SearchableOrder {Id = ViewModel.Arguments.OrderId,};
         }
 
         internal void RegisterOrderEditorEvents()
@@ -74,7 +71,8 @@ internal sealed partial class OrderDetailsPage
                 ViewModel.IsPrinting = true;
                 ViewModel.PrintButtonText = "Printing...";
 
-                await ViewModel.Arguments.ReportService.CreateReport(ViewModel.Order);
+                var report = await ViewModel.Arguments.ReportApi.GenerateOrderReport(ViewModel.Order.Id);
+                new ReportDownloadService().Download(report);
                 logger.LogInformation("Generated order report for order {OrderId}.", ViewModel.Order.Id);
             }
             catch (Exception exe)
@@ -90,7 +88,7 @@ internal sealed partial class OrderDetailsPage
             }
         }
 
-        private void ApplyEditorValuesToOrder()
+        private UpdateOrderDto BuildUpdateOrder()
         {
             logger.LogDebug("Applying order changes. OrderId={OrderId}", ViewModel.Order.Id);
 
@@ -115,13 +113,17 @@ internal sealed partial class OrderDetailsPage
             logger.LogDebug("CustomerId: '{OldValue}' -> '{NewValue}'", ViewModel.Order.CustomerId,
                 ViewModel.OrderEditor.ViewModel.CustomerId);
 
-            ViewModel.Order.HandInWhen = ViewModel.OrderEditor.ViewModel.HandInWhen;
-            ViewModel.Order.ReturnedWhen = ViewModel.OrderEditor.ViewModel.ReturnedWhen;
-            ViewModel.Order.HandInWhat = ViewModel.OrderEditor.ViewModel.HandInWhat;
-            ViewModel.Order.RepairWhat = ViewModel.OrderEditor.ViewModel.RepairWhat;
-            ViewModel.Order.IsOrderComplete = ViewModel.OrderEditor.ViewModel.IsOrderComplete;
-            ViewModel.Order.BorrowedPhone = ViewModel.OrderEditor.ViewModel.BorrowedPhone;
-            ViewModel.Order.CustomerId = ViewModel.OrderEditor.ViewModel.CustomerId;
+            return new UpdateOrderDto
+            {
+                Version = ViewModel.Order.Version,
+                HandInWhen = ViewModel.OrderEditor.ViewModel.HandInWhen,
+                ReturnedWhen = ViewModel.OrderEditor.ViewModel.ReturnedWhen,
+                HandInWhat = ViewModel.OrderEditor.ViewModel.HandInWhat,
+                RepairWhat = ViewModel.OrderEditor.ViewModel.RepairWhat,
+                IsOrderComplete = ViewModel.OrderEditor.ViewModel.IsOrderComplete,
+                BorrowedPhone = ViewModel.OrderEditor.ViewModel.BorrowedPhone,
+                CustomerId = ViewModel.OrderEditor.ViewModel.CustomerId,
+            };
         }
 
         private void ApplyOrderToEditor()
@@ -147,7 +149,7 @@ internal sealed partial class OrderDetailsPage
                 return;
             }
 
-            await queryService.DeleteEntityById(ViewModel.Order.Id);
+            await orderApi.DeleteSingle(ViewModel.Order.Id);
 
             logger.LogInformation("Deleted order {OrderId}", ViewModel.Order.Id);
 
@@ -161,9 +163,7 @@ internal sealed partial class OrderDetailsPage
 
         protected override async Task SaveChanges()
         {
-            ApplyEditorValuesToOrder();
-
-            await queryService.UpdateEntity(ViewModel.Order!);
+            ViewModel.Order = await orderApi.UpdateSingle(ViewModel.Order.Id, BuildUpdateOrder());
             logger.LogInformation("Saved changes to order {OrderId}.", ViewModel.Order.Id);
             logger.LogDebug(
                 "Order changes saved to Db. Customer navigation after save: Id={CustomerId}, Name='{CustomerName}'",
@@ -177,6 +177,11 @@ internal sealed partial class OrderDetailsPage
 
         protected override void UpdateHasChanges()
         {
+            if (ViewModel.Order is null)
+            {
+                return;
+            }
+
             ViewModel.HasChanges = ViewModel.OrderEditor.ViewModel.HandInWhen != ViewModel.Order.HandInWhen ||
                                    ViewModel.OrderEditor.ViewModel.ReturnedWhen != ViewModel.Order.ReturnedWhen ||
                                    ViewModel.OrderEditor.ViewModel.HandInWhat != ViewModel.Order.HandInWhat ||

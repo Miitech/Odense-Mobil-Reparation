@@ -1,7 +1,7 @@
+using Repair.Models.Dto.Get;
 using CommunityToolkit.WinUI.UI.Controls;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pages;
 
@@ -23,7 +23,7 @@ internal sealed partial class OrdersPage
                 return;
             }
 
-            if (dataGrid.SelectedItem is not Order order)
+            if (dataGrid.SelectedItem is not GetOrderDto order)
             {
                 return;
             }

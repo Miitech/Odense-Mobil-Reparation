@@ -1,11 +1,11 @@
+using Repair.Models.Dto.Get;
+using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Extensions;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Factory;
 using Repair.Models.Entity.ComplexSearchable;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 using Repair.Models.Extensions;
 
@@ -15,13 +15,13 @@ internal sealed partial class OrdersGrid
 {
     internal sealed partial class OrdersGridLogic : BaseLogic<OrdersGridViewModel>
     {
-        private readonly IEntityQueryService<Order, SearchableOrder> orderQueryService;
+        private readonly IOrderApi orderApi;
         private readonly IUiDispatcher uiDispatcher;
         private readonly ILogger<OrdersGridLogic> logger;
 
         public OrdersGridLogic(OrdersGridViewModel viewModel) : base(viewModel)
         {
-            orderQueryService = ViewModel.Arguments.OrderQueryService;
+            orderApi = ViewModel.Arguments.OrderApi;
             uiDispatcher = ViewModel.Arguments.UiDispatcher;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<OrdersGridLogic>();
 
@@ -44,7 +44,7 @@ internal sealed partial class OrdersGrid
         {
             ComplexSearchableOrder searchable = CreateSearchableOrder();
 
-            List<Order> orders = (await orderQueryService.GetEntitiesComplex(searchable)).ToList();
+            List<GetOrderDto> orders = (await orderApi.SearchComplex(searchable)).ToList();
             orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
 
             logger.LogInformation(

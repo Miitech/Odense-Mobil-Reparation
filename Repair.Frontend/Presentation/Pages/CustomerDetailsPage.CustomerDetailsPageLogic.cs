@@ -1,10 +1,12 @@
+using Repair.Frontend.Services;
+using Repair.Models.Dto.Update;
+using Repair.Models.Dto.Get;
+using Repair.Models.Api;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Core.Details;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -13,20 +15,20 @@ internal sealed partial class CustomerDetailsPage
 {
     private sealed class CustomerDetailsPageLogic : BaseDetailsPageLogic<CustomerDetailsPageViewModel>
     {
-        private readonly IEntityQueryService<Customer, SearchableCustomer> queryService;
+        private readonly ICustomerApi customerApi;
         private readonly IUiDispatcher uiDispatcher;
         private readonly ILogger<CustomerDetailsPageLogic> logger;
 
         public CustomerDetailsPageLogic(CustomerDetailsPageViewModel viewModel) : base(viewModel)
         {
-            queryService = ViewModel.Arguments.CustomerQueryService;
+            customerApi = ViewModel.Arguments.CustomerApi;
             uiDispatcher = ViewModel.Arguments.UiDispatcher;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<CustomerDetailsPageLogic>();
         }
 
         internal async Task RefreshCustomer()
         {
-            Customer? customer = await queryService.GetEntity(CreateSearchableCustomer());
+            GetCustomerDto customer = await customerApi.GetSingle(ViewModel.Arguments.CustomerId);
 
             if (customer is null)
             {
@@ -38,11 +40,6 @@ internal sealed partial class CustomerDetailsPage
                 ViewModel.Customer = customer;
                 ApplyCustomerToEditor();
             });
-        }
-
-        private SearchableCustomer CreateSearchableCustomer()
-        {
-            return new SearchableCustomer {Id = ViewModel.Arguments.CustomerId,};
         }
 
         internal void RegisterCustomerEditorEvents()
@@ -57,7 +54,7 @@ internal sealed partial class CustomerDetailsPage
             UpdateHasChanges();
         }
 
-        private void ApplyEditorValuesToCustomer()
+        private UpdateCustomerDto BuildUpdateCustomer()
         {
             logger.LogDebug("Applying customer changes. Id={CustomerId}", ViewModel.Customer.Id);
 
@@ -70,9 +67,13 @@ internal sealed partial class CustomerDetailsPage
             logger.LogDebug("Phone: '{OldValue}' -> '{NewValue}'", ViewModel.Customer.Phone,
                 ViewModel.CustomerEditor.ViewModel.Phone);
 
-            ViewModel.Customer.Name = ViewModel.CustomerEditor.ViewModel.Name;
-            ViewModel.Customer.Email = ViewModel.CustomerEditor.ViewModel.Email;
-            ViewModel.Customer.Phone = ViewModel.CustomerEditor.ViewModel.Phone;
+            return new UpdateCustomerDto
+            {
+                Version = ViewModel.Customer.Version,
+                Name = ViewModel.CustomerEditor.ViewModel.Name,
+                Email = ViewModel.CustomerEditor.ViewModel.Email,
+                Phone = ViewModel.CustomerEditor.ViewModel.Phone,
+            };
         }
 
         private void ApplyCustomerToEditor()
@@ -89,7 +90,7 @@ internal sealed partial class CustomerDetailsPage
                 return;
             }
 
-            if (dataGrid.SelectedItem is not Order order)
+            if (dataGrid.SelectedItem is not GetOrderDto order)
             {
                 return;
             }
@@ -121,7 +122,7 @@ internal sealed partial class CustomerDetailsPage
                 return;
             }
 
-            await queryService.DeleteEntityById(ViewModel.Customer.Id);
+            await customerApi.DeleteSingle(ViewModel.Customer.Id);
 
             logger.LogInformation("Deleted customer {CustomerId}", ViewModel.Customer.Id);
 
@@ -135,9 +136,7 @@ internal sealed partial class CustomerDetailsPage
 
         protected override async Task SaveChanges()
         {
-            ApplyEditorValuesToCustomer();
-
-            await queryService.UpdateEntity(ViewModel.Customer);
+            ViewModel.Customer = await customerApi.UpdateSingle(ViewModel.Customer.Id, BuildUpdateCustomer());
             logger.LogInformation("Saved changes to customer {CustomerId}.", ViewModel.Customer.Id);
         }
 
@@ -148,6 +147,11 @@ internal sealed partial class CustomerDetailsPage
 
         protected override void UpdateHasChanges()
         {
+            if (ViewModel.Customer is null)
+            {
+                return;
+            }
+
             ViewModel.HasChanges = ViewModel.CustomerEditor.ViewModel.Name != ViewModel.Customer.Name ||
                                    ViewModel.CustomerEditor.ViewModel.Email != ViewModel.Customer.Email ||
                                    ViewModel.CustomerEditor.ViewModel.Phone != ViewModel.Customer.Phone;
@@ -179,7 +183,8 @@ internal sealed partial class CustomerDetailsPage
                 ViewModel.IsPrinting = true;
                 ViewModel.PrintButtonText = "Printing...";
 
-                await ViewModel.Arguments.ReportService.CreateReport(ViewModel.Customer);
+                var report = await ViewModel.Arguments.ReportApi.GenerateCustomerReport(ViewModel.Customer.Id);
+                new ReportDownloadService().Download(report);
                 logger.LogInformation("Generated customer report for customer {CustomerId}.", ViewModel.Customer.Id);
             }
             catch (Exception exe)

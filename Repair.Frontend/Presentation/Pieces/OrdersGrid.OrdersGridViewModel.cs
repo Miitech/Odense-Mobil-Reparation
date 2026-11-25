@@ -1,6 +1,6 @@
+using Repair.Models.Dto.Get;
 using System.Collections.ObjectModel;
 using CommunityToolkit.WinUI.UI.Controls;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pieces;
 
@@ -33,7 +33,7 @@ internal sealed partial class OrdersGrid
             get => Arguments.CustomerId;
         }
 
-        public ObservableCollection<Order> Orders { get; } = [];
+        public ObservableCollection<GetOrderDto> Orders { get; } = [];
 
         [ObservableProperty] private string handInWhatSearchText = string.Empty;
         [ObservableProperty] private string borrowedPhoneSearchText = string.Empty;

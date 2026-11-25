@@ -1,10 +1,10 @@
+using Repair.Models.Dto.Get;
 using System.ComponentModel;
 using CommunityToolkit.WinUI.UI.Controls;
 using Repair.Abstractions.Entity.Model;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Services;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pages;
 
@@ -35,7 +35,7 @@ internal sealed partial class CustomersPage
                 return;
             }
 
-            if (dataGrid.SelectedItem is not Customer customer)
+            if (dataGrid.SelectedItem is not GetCustomerDto customer)
             {
                 return;
             }

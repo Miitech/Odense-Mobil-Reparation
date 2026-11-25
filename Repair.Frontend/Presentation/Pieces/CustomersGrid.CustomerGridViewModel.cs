@@ -1,6 +1,6 @@
+using Repair.Models.Dto.Get;
 using System.Collections.ObjectModel;
 using CommunityToolkit.WinUI.UI.Controls;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pieces;
 
@@ -17,10 +17,10 @@ internal sealed partial class CustomersGrid
         internal CustomerEditor CustomerEditor { get; set; } = null!;
         internal CheckBox FuzzySearchToggle { get; set; } = null!;
 
-        public ObservableCollection<Customer> Customers { get; } = [];
+        public ObservableCollection<GetCustomerDto> Customers { get; } = [];
 
         [ObservableProperty] private int selectedCustomerId = arguments.SelectedCustomerId;
-        [ObservableProperty] private Customer? selectedCustomer;
+        [ObservableProperty] private GetCustomerDto? selectedCustomer;
 
         [ObservableProperty] [NotifyPropertyChangedFor(nameof(SearchModeText))]
         private bool useFuzzySearch = true;
@@ -51,7 +51,7 @@ internal sealed partial class CustomersGrid
 
         partial void OnSelectedCustomerIdChanged(int value)
         {
-            Customer? customer = Customers.FirstOrDefault(x => x.Id == value);
+            GetCustomerDto? customer = Customers.FirstOrDefault(x => x.Id == value);
 
             if (SelectedCustomer?.Id != customer?.Id)
             {
@@ -61,7 +61,7 @@ internal sealed partial class CustomersGrid
             CustomerSelectionChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        partial void OnSelectedCustomerChanged(Customer? value)
+        partial void OnSelectedCustomerChanged(GetCustomerDto? value)
         {
             int customerId = value?.Id ?? 0;
 

@@ -1,7 +1,6 @@
-using Repair.Abstractions.Persistence;
+using Repair.Models.Api;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Factory;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -26,7 +25,7 @@ internal sealed partial class CustomerCreationPage : Border
     }
 
     internal sealed record CustomerCreationPageArguments(
-        IEntityQueryService<Customer, SearchableCustomer> CustomerQueryService,
+        ICustomerApi CustomerApi,
         INavigationService NavigationService,
         ILoggerFactory LoggerFactory);
 }

@@ -1,6 +1,6 @@
+using Repair.Models.Dto.Get;
 using System.ComponentModel;
 using Repair.Frontend.Presentation.Core;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pieces;
 
@@ -55,7 +55,7 @@ internal sealed partial class OrderEditor
 
         private void UpdateSelectedCustomerText()
         {
-            Customer? customer =
+            GetCustomerDto? customer =
                 ViewModel.CustomersGrid.ViewModel.Customers.FirstOrDefault(x =>
                     x.Id == ViewModel.CustomersGrid.ViewModel.SelectedCustomerId);
 

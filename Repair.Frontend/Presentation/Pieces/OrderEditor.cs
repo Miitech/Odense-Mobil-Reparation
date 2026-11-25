@@ -1,6 +1,6 @@
+using Repair.Models.Dto.Get;
 using Repair.Frontend.Presentation.Factory;
 using Repair.Frontend.Services;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pieces;
 
@@ -26,5 +26,5 @@ internal sealed partial class OrderEditor : Border
         Logic.UpdateReadOnlyState();
     }
 
-    internal sealed record OrderEditorArguments(Order? Order = null, int SelectedCustomerId = 0);
+    internal sealed record OrderEditorArguments(GetOrderDto? Order = null, int SelectedCustomerId = 0);
 }

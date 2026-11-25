@@ -1,31 +1,31 @@
+using Repair.Models.Dto.Get;
+using Repair.Abstractions.Api;
+using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
-using Repair.Abstractions.Services;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Pages;
 using Repair.Frontend.Presentation.Pieces;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Services;
 
 internal class ArgumentsFactory(
-    IEntityQueryService<Customer, SearchableCustomer> customerQueryService,
-    IEntityQueryService<Order, SearchableOrder> orderQueryService,
+    ICustomerApi customerApi,
+    IOrderApi orderApi,
     IUiDispatcher uiDispatcher,
     ILoggerFactory loggerFactory,
     INavigationService navigationService,
-    IReportService reportService)
+    IReportApi reportApi)
 {
     internal CustomerDetailsPage.CustomerDetailsPageArguments CreateCustomerDetailsPageArguments(int customerId)
     {
-        return new CustomerDetailsPage.CustomerDetailsPageArguments(customerId, customerQueryService, uiDispatcher,
-            loggerFactory, navigationService, reportService);
+        return new CustomerDetailsPage.CustomerDetailsPageArguments(customerId, customerApi, uiDispatcher,
+            loggerFactory, navigationService, reportApi);
     }
 
     internal OrdersGrid.OrdersGridArguments CreateOrderGridArguments(int customerId = 0)
     {
-        return new OrdersGrid.OrdersGridArguments(orderQueryService, uiDispatcher, loggerFactory, customerId);
+        return new OrdersGrid.OrdersGridArguments(orderApi, uiDispatcher, loggerFactory, customerId);
     }
 
     internal CustomersPage.CustomersPageArguments CreateCustomersPageArguments()
@@ -40,7 +40,7 @@ internal class ArgumentsFactory(
 
     internal CustomerCreationPage.CustomerCreationPageArguments CreateCustomerCreationPageArguments()
     {
-        return new CustomerCreationPage.CustomerCreationPageArguments(customerQueryService, navigationService,
+        return new CustomerCreationPage.CustomerCreationPageArguments(customerApi, navigationService,
             loggerFactory);
     }
 
@@ -57,7 +57,7 @@ internal class ArgumentsFactory(
 
     internal OrderCreationPage.OrderCreationPageArguments CreateOrderCreationPageArguments(int selectedCustomerId = 0)
     {
-        return new OrderCreationPage.OrderCreationPageArguments(orderQueryService, navigationService, loggerFactory,
+        return new OrderCreationPage.OrderCreationPageArguments(orderApi, navigationService, loggerFactory,
             selectedCustomerId);
     }
 
@@ -69,20 +69,20 @@ internal class ArgumentsFactory(
 
     internal CustomersGrid.CustomersGridArguments CreateCustomersGridArguments(int selectedCustomerId = 0)
     {
-        return new CustomersGrid.CustomersGridArguments(customerQueryService, uiDispatcher, loggerFactory,
+        return new CustomersGrid.CustomersGridArguments(customerApi, uiDispatcher, loggerFactory,
             selectedCustomerId);
     }
 
     internal OrderEditor.OrderEditorArguments CreateOrderEditorArguments(
-        Order? order = null, int selectedCustomerId = 0)
+        GetOrderDto? order = null, int selectedCustomerId = 0)
     {
         return new OrderEditor.OrderEditorArguments(order, selectedCustomerId);
     }
 
     internal OrderDetailsPage.OrderDetailsPageArguments CreateOrderDetailsPageArguments(int orderId)
     {
-        return new OrderDetailsPage.OrderDetailsPageArguments(orderId, orderQueryService, uiDispatcher, loggerFactory,
-            navigationService, reportService);
+        return new OrderDetailsPage.OrderDetailsPageArguments(orderId, orderApi, uiDispatcher, loggerFactory,
+            navigationService, reportApi);
     }
 }
     

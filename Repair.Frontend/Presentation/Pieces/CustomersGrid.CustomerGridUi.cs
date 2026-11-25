@@ -1,10 +1,10 @@
+using Repair.Models.Dto.Get;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Text;
 using Repair.Frontend.Extensions;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Factory;
 using Repair.Frontend.Services;
-using Repair.Models.Entity.Model;
 using static Repair.Frontend.Presentation.Pieces.OrdersGrid.OrdersGridUi;
 
 namespace Repair.Frontend.Presentation.Pieces;
@@ -89,9 +89,9 @@ internal sealed partial class CustomersGrid
         {
             return column switch
             {
-                CustomerGridColumns.NAME => nameof(Customer.Name),
-                CustomerGridColumns.PHONE => nameof(Customer.Phone),
-                CustomerGridColumns.EMAIL => nameof(Customer.Email),
+                CustomerGridColumns.NAME => nameof(GetCustomerDto.Name),
+                CustomerGridColumns.PHONE => nameof(GetCustomerDto.Phone),
+                CustomerGridColumns.EMAIL => nameof(GetCustomerDto.Email),
                 var _ => throw new ArgumentOutOfRangeException(nameof(column), column, null),
             };
         }

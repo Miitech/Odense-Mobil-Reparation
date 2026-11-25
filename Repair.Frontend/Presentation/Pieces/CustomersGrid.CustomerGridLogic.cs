@@ -1,11 +1,11 @@
+using Repair.Models.Dto.Get;
+using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Extensions;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Factory;
 using Repair.Models.Entity.ComplexSearchable;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 using Repair.Models.Extensions;
 
@@ -15,13 +15,13 @@ internal sealed partial class CustomersGrid
 {
     internal sealed partial class CustomersGridLogic : BaseLogic<CustomersGridViewModel>
     {
-        private readonly IEntityQueryService<Customer, SearchableCustomer> queryService;
+        private readonly ICustomerApi customerApi;
         private readonly IUiDispatcher uiDispatcher;
         private readonly ILogger<CustomersGridLogic> logger;
 
         public CustomersGridLogic(CustomersGridViewModel viewModel) : base(viewModel)
         {
-            queryService = ViewModel.Arguments.QueryService;
+            customerApi = ViewModel.Arguments.CustomerApi;
             uiDispatcher = ViewModel.Arguments.UiDispatcher;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<CustomersGridLogic>();
 
@@ -46,7 +46,7 @@ internal sealed partial class CustomersGrid
 
             ComplexSearchableCustomer searchable = CreateSearchableCustomer();
 
-            List<Customer> customers = (await queryService.GetEntitiesComplex(searchable)).ToList();
+            List<GetCustomerDto> customers = (await customerApi.SearchComplex(searchable)).ToList();
             customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
 
             logger.LogInformation("Customer search returned {CustomerCount} customers. Fuzzy search: {UseFuzzySearch}",

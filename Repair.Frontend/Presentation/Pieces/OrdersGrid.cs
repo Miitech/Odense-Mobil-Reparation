@@ -1,9 +1,8 @@
+using Repair.Models.Api;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Factory;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pieces;
@@ -30,7 +29,7 @@ internal sealed partial class OrdersGrid : Border, INavigationRefreshable
     private OrdersGridLogic Logic { get; set; }
 
     internal record OrdersGridArguments(
-        IEntityQueryService<Order, SearchableOrder> OrderQueryService,
+        IOrderApi OrderApi,
         IUiDispatcher UiDispatcher,
         ILoggerFactory LoggerFactory,
         int CustomerId = 0)

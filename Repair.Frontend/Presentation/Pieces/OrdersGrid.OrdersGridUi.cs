@@ -1,3 +1,4 @@
+using Repair.Models.Dto.Get;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Text;
 using Repair.Frontend.Extensions;
@@ -5,7 +6,6 @@ using Repair.Frontend.Presentation.Converters;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Factory;
 using Repair.Frontend.Services;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pieces;
 
@@ -203,13 +203,13 @@ internal sealed partial class OrdersGrid
         {
             return column switch
             {
-                OrderGridColumns.HAND_IN_WHAT => nameof(Order.HandInWhat),
-                OrderGridColumns.REPAIR_WHAT => nameof(Order.RepairWhat),
-                OrderGridColumns.HANDED_IN_WHEN => nameof(Order.HandInWhen),
-                OrderGridColumns.RETURNED_WHEN => nameof(Order.ReturnedWhen),
-                OrderGridColumns.IS_ORDER_COMPLETE => nameof(Order.IsOrderComplete),
-                OrderGridColumns.BORROWED_PHONE => nameof(Order.BorrowedPhone),
-                OrderGridColumns.CUSTOMER_NAME => $"{nameof(Order.Customer)}.{nameof(Customer.Name)}",
+                OrderGridColumns.HAND_IN_WHAT => nameof(GetOrderDto.HandInWhat),
+                OrderGridColumns.REPAIR_WHAT => nameof(GetOrderDto.RepairWhat),
+                OrderGridColumns.HANDED_IN_WHEN => nameof(GetOrderDto.HandInWhen),
+                OrderGridColumns.RETURNED_WHEN => nameof(GetOrderDto.ReturnedWhen),
+                OrderGridColumns.IS_ORDER_COMPLETE => nameof(GetOrderDto.IsOrderComplete),
+                OrderGridColumns.BORROWED_PHONE => nameof(GetOrderDto.BorrowedPhone),
+                OrderGridColumns.CUSTOMER_NAME => $"{nameof(GetOrderDto.Customer)}.{nameof(GetCustomerDto.Name)}",
                 var _ => throw new ArgumentOutOfRangeException(nameof(column), column, null),
             };
         }

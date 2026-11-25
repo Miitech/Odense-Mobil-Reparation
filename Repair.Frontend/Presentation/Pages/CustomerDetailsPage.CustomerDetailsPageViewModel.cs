@@ -1,7 +1,7 @@
+using Repair.Models.Dto.Get;
 using Repair.Frontend.Presentation.Core;
 using Repair.Frontend.Presentation.Core.Details;
 using Repair.Frontend.Presentation.Pieces;
-using Repair.Models.Entity.Model;
 
 namespace Repair.Frontend.Presentation.Pages;
 
@@ -12,7 +12,7 @@ internal sealed partial class CustomerDetailsPage
     {
         public CustomerDetailsPageArguments Arguments { get; } = arguments;
 
-        [ObservableProperty] private Customer customer = null!;
+        [ObservableProperty] private GetCustomerDto customer = null!;
 
         public CustomerEditor CustomerEditor { get; set; } = null!;
         public OrdersGrid OrdersGrid { get; set; } = null!;

@@ -1,9 +1,8 @@
+using Repair.Abstractions.Api;
+using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
-using Repair.Abstractions.Persistence;
-using Repair.Abstractions.Services;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Factory;
-using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 
 namespace Repair.Frontend.Presentation.Pages;
@@ -31,9 +30,9 @@ internal sealed partial class CustomerDetailsPage : Border
 
     internal sealed record CustomerDetailsPageArguments(
         int CustomerId,
-        IEntityQueryService<Customer, SearchableCustomer> CustomerQueryService,
+        ICustomerApi CustomerApi,
         IUiDispatcher UiDispatcher,
         ILoggerFactory LoggerFactory,
         INavigationService NavigationService,
-        IReportService ReportService);
+        IReportApi ReportApi);
 }
