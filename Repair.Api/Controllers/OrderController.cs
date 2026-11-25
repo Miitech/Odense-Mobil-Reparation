@@ -1,3 +1,5 @@
+using Repair.Api.Exceptions;
+using Repair.Models.Api;
 using Microsoft.AspNetCore.Mvc;
 using Repair.Abstractions.Persistence;
 using Repair.Api.Controllers.Core;
@@ -10,14 +12,8 @@ using Repair.Models.Entity.Searchable;
 
 namespace Repair.Api.Controllers;
 
-public class OrderController : EntityController<
-    Order,
-    SearchableOrder,
-    ComplexSearchableOrder,
-    AddOrderDto,
-    UpdateOrderDto,
-    GetOrderDto,
-    OrderController>
+public class OrderController : EntityController<Order, SearchableOrder, ComplexSearchableOrder, AddOrderDto,
+    UpdateOrderDto, GetOrderDto, OrderController>, IOrderApi
 {
     private readonly IEntityQueryService<Customer, SearchableCustomer> customerQueryService;
     private readonly Dictionary<int, Customer> customers = new();
@@ -31,31 +27,36 @@ public class OrderController : EntityController<
         this.customerQueryService = customerQueryService;
     }
 
-    public override async Task<ActionResult<GetOrderDto>> AddSingle([FromBody] AddOrderDto dto)
+    public override async Task<GetOrderDto> AddSingle([FromBody] AddOrderDto dto)
     {
         if (!await LoadCustomer(dto.CustomerId))
-            return BadRequest("Invalid customer ID.");
+        {
+            throw new EntityValidationException("Invalid customer ID.");
+        }
 
         return await base.AddSingle(dto);
     }
 
-    public override async Task<ActionResult<IEnumerable<GetOrderDto>>> AddMultiple(
-        [FromBody] IEnumerable<AddOrderDto> dtos)
+    public override async Task<IEnumerable<GetOrderDto>> AddMultiple([FromBody] IEnumerable<AddOrderDto> dtos)
     {
         var orders = dtos.ToList();
         foreach (int customerId in orders.Select(x => x.CustomerId).Distinct())
         {
             if (!await LoadCustomer(customerId))
-                return BadRequest($"Invalid customer ID: {customerId}.");
+            {
+                throw new EntityValidationException($"Invalid customer ID: {customerId}.");
+            }
         }
 
         return await base.AddMultiple(orders);
     }
 
-    public override async Task<ActionResult<GetOrderDto>> UpdateSingle(int id, [FromBody] UpdateOrderDto dto)
+    public override async Task<GetOrderDto> UpdateSingle(int id, [FromBody] UpdateOrderDto dto)
     {
         if (!await LoadCustomer(dto.CustomerId))
-            return BadRequest("Invalid customer ID.");
+        {
+            throw new EntityValidationException("Invalid customer ID.");
+        }
 
         return await base.UpdateSingle(id, dto);
     }
@@ -63,11 +64,17 @@ public class OrderController : EntityController<
     private async Task<bool> LoadCustomer(int id)
     {
         if (id <= 0)
+        {
+            logger.LogWarning("Order request supplied an invalid Customer ID {CustomerId}.", id);
             return false;
+        }
 
         var customer = await customerQueryService.GetEntity(new SearchableCustomer { Id = id });
         if (customer is null)
+        {
+            logger.LogWarning("Order request referenced Customer with ID {CustomerId}, which does not exist.", id);
             return false;
+        }
 
         customers[id] = customer;
         return true;

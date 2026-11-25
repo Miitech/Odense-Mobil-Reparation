@@ -1,3 +1,4 @@
+using Repair.Models.Api;
 using Repair.Abstractions.Persistence;
 using Repair.Api.Controllers.Core;
 using Repair.Models.Dto.Add;
@@ -16,7 +17,7 @@ public class CustomerController : EntityController<
     AddCustomerDto,
     UpdateCustomerDto,
     GetCustomerDto,
-    CustomerController>
+    CustomerController>, ICustomerApi
 {
     public CustomerController(
         IEntityQueryService<Customer, SearchableCustomer> queryService,
