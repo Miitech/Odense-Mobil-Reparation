@@ -14,11 +14,20 @@ public partial class ConfigurationService
     {
 #if __WASM__
         using var client = new HttpClient();
-        var address = new Uri(new Uri(GetDocumentBaseUri("document.baseURI")), APP_SETTINGS_FILE);
-        using var stream = await client.GetStreamAsync(address);
-        return new ConfigurationBuilder().AddJsonStream(stream).Build();
+
+        string baseUri = GetDocumentBaseUri("document.baseURI");
+        var address = new Uri(new Uri(baseUri), APP_SETTINGS_FILE);
+
+        byte[] content = await client.GetByteArrayAsync(address);
+
+        using var stream = new MemoryStream(content);
+
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+
+        return configuration;
 #else
-        throw new PlatformNotSupportedException("Hosted configuration requires WebAssembly.");
+        throw new PlatformNotSupportedException(
+            "Hosted configuration requires WebAssembly.");
 #endif
     }
 

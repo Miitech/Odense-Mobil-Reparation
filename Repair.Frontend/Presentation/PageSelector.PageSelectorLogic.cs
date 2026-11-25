@@ -1,8 +1,5 @@
-using System.Diagnostics;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Core;
-using Repair.Services;
-using SkiaSharp;
 
 namespace Repair.Frontend.Presentation
 {
@@ -11,8 +8,7 @@ namespace Repair.Frontend.Presentation
         private sealed class PageSelectorLogic(
             PageSelectorViewModel viewModel,
             IServiceProvider serviceProvider,
-            INavigationService navigationService,
-            ConfigurationService configurationService) : BaseLogic<PageSelectorViewModel>(viewModel)
+            INavigationService navigationService) : BaseLogic<PageSelectorViewModel>(viewModel)
         {
             internal void BackButtonClicked(object sender, RoutedEventArgs e)
             {
@@ -41,17 +37,6 @@ namespace Repair.Frontend.Presentation
 
                 UIElement control = region.CreateControl(serviceProvider);
                 navigationService.NavigateTo(control, region.DisplayName);
-            }
-
-            internal void OpenApplicationFolderButtonClicked(object sender, RoutedEventArgs e)
-            {
-                string path = configurationService.GetApplicationDataPath();
-
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = path,
-                    UseShellExecute = true,
-                });
             }
         }
     }

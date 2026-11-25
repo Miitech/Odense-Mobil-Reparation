@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Repair.Frontend.Styles;
 using Repair.Frontend.Services;
 using Uno.Resizetizer;
@@ -14,69 +15,71 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-        //RequestedTheme = ApplicationTheme.Light;
     }
 
     private Window? MainWindow { get; set; }
     protected IHost? Host { get; private set; }
     internal static UnoStartup Startup { get; private set; } = null!;
 
-    [SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Uno.Extensions APIs are used in a way that is safe for trimming in this template context.")]
+    [SuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "Uno.Extensions APIs are used in a way that is safe for trimming in this template context.")]
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        //RequestedTheme = ApplicationTheme.Light;
+        try
+        {
+            var configurationService = new ConfigurationService();
 
-        var configurationService = new ConfigurationService();
-        var deploymentConfiguration = await configurationService.BuildConfiguration();
-        Startup = new UnoStartup(configurationService.GetApiBaseAddress(deploymentConfiguration));
+            IConfiguration deploymentConfiguration = await configurationService.BuildConfiguration();
 
-        // Load WinUI Resources
-        Resources.Build(r => r.Merged(new XamlControlsResources()));
+            Startup = new UnoStartup(configurationService.GetApiBaseAddress(deploymentConfiguration));
 
-        // Load Uno.UI.Toolkit and Material Resources
-        Resources.Build(r => r.Merged(
-            new MaterialToolkitTheme(new ColorPaletteOverride(), new MaterialFontsOverride())));
+            // Load WinUI Resources
+            Resources.Build(r => r.Merged(new XamlControlsResources()));
 
-        IApplicationBuilder builder = this.CreateBuilder(args);
+            // Load Uno.UI.Toolkit and Material Resources
+            Resources.Build(r => r.Merged(
+                new MaterialToolkitTheme(new ColorPaletteOverride(), new MaterialFontsOverride())));
 
-        Startup.SetupApplication(builder).Configure(host =>
-            host.ConfigureServices(collection => Startup.SetupServices(collection)));
+            IApplicationBuilder builder = this.CreateBuilder(args);
 
-        MainWindow = builder.Window;
+            Startup.SetupApplication(builder).Configure(host =>
+                host.ConfigureServices(collection => Startup.SetupServices(collection)));
+
+            MainWindow = builder.Window;
 
 #if DEBUG
-        MainWindow.UseStudio();
+            MainWindow.UseStudio();
 #endif
-        MainWindow.SetWindowIcon();
 
-        Host = builder.Build();
+            MainWindow.SetWindowIcon();
 
-        ActivateStartingWindow(MainWindow, args);
+            Host = builder.Build();
+
+            ActivateStartingWindow(MainWindow, args);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"[Startup ERROR] Application launch failed: {exception}");
+            throw;
+        }
     }
 
     private void ActivateStartingWindow(Window mainWindow, LaunchActivatedEventArgs args)
     {
-        // Do not repeat app initialization when the Window already has content,
-        // just ensure that the window is active
         if (mainWindow.Content is not Frame rootFrame)
         {
-            // Create a Frame to act as the navigation context and navigate to the first page
             rootFrame = new Frame();
-
-            // Place the frame in the current Window
             mainWindow.Content = rootFrame;
         }
 
         if (rootFrame.Content == null)
         {
-            // When the navigation stack isn't restored navigate to the first page,
-            // configuring the new page by passing required information as a navigation
-            // parameter
             rootFrame.Navigate(typeof(MainPage), args.Arguments);
         }
 
         Startup.FlushStartupLogs();
-        // Ensure the current window is active
+
         mainWindow.Activate();
     }
 }

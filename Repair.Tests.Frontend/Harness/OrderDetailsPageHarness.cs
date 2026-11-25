@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Repair.Abstractions.Persistence;
-using Repair.Abstractions.Services;
+using Repair.Abstractions.Api;
+using Repair.Models.Api;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.Presentation.Pages;
 using Repair.Models.Entity.Model;
-using Repair.Models.Entity.Searchable;
 using MockFactory = Repair.Tests.Frontend.Core.MockFactory;
 
 namespace Repair.Tests.Frontend.Harness;
@@ -15,9 +14,8 @@ internal sealed class OrderDetailsPageHarness
     private OrderDetailsPageHarness(
         OrderDetailsPage.OrderDetailsPageArguments arguments, OrderDetailsPage.OrderDetailsPageViewModel viewModel,
         OrderDetailsPage.OrderDetailsPageLogic logic, OrderDetailsPage.OrderDetailsPageUi ui,
-        Mock<IEntityQueryService<Order, SearchableOrder>> orderQueryServiceMock,
-        Mock<INavigationService> navigationServiceMock, Mock<IReportService> reportServiceMock,
-        Mock<IUiDispatcher> uiDispatcherMock)
+        Mock<IOrderApi> orderQueryServiceMock, Mock<INavigationService> navigationServiceMock,
+        Mock<IReportApi> reportServiceMock, Mock<IUiDispatcher> uiDispatcherMock)
     {
         Arguments = arguments;
         ViewModel = viewModel;
@@ -34,17 +32,16 @@ internal sealed class OrderDetailsPageHarness
     internal OrderDetailsPage.OrderDetailsPageLogic Logic { get; }
     internal OrderDetailsPage.OrderDetailsPageUi Ui { get; }
 
-    internal Mock<IEntityQueryService<Order, SearchableOrder>> OrderQueryServiceMock { get; }
+    internal Mock<IOrderApi> OrderQueryServiceMock { get; }
     internal Mock<INavigationService> NavigationServiceMock { get; }
-    internal Mock<IReportService> ReportServiceMock { get; }
+    internal Mock<IReportApi> ReportServiceMock { get; }
     internal Mock<IUiDispatcher> UiDispatcherMock { get; }
 
     internal static OrderDetailsPageHarness Create(Order order)
     {
-        Mock<IEntityQueryService<Order, SearchableOrder>> orderQueryServiceMock =
-            MockFactory.CreateOrderQueryService(order);
+        Mock<IOrderApi> orderQueryServiceMock = new();
         Mock<INavigationService> navigationServiceMock = MockFactory.CreateNavigationService();
-        Mock<IReportService> reportServiceMock = MockFactory.CreateReportService();
+        Mock<IReportApi> reportServiceMock = new();
         Mock<IUiDispatcher> uiDispatcherMock = MockFactory.CreateUiDispatcher();
 
         OrderDetailsPage.OrderDetailsPageArguments arguments = new(order.Id, orderQueryServiceMock.Object,

@@ -1,21 +1,12 @@
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using Microsoft.UI.Dispatching;
 using Repair.Abstractions.Api;
-using Repair.Abstractions.Services;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.NavigationRegions;
 using Repair.Frontend.Services;
 using Repair.Frontend.Startup;
-using Repair.Models.Entity.Model;
-using Repair.Models.Entity.Searchable;
-using Repair.Models.Settings;
-using Repair.Persistence;
-using Repair.Persistence.Services;
-using Repair.Services;
 using Repair.Startup;
 using Repair.Startup.Modules;
-using BackendConfigurationService = Repair.Services.ConfigurationService;
 
 namespace Repair.Frontend;
 
@@ -23,29 +14,14 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
 {
     public IHost? Host { get; private set; }
 
-    private readonly IConfiguration configuration;
-    private readonly BackendConfigurationService configurationService;
-
     public UnoStartup(Uri apiBaseAddress)
     {
-        configurationService = new BackendConfigurationService(GetType().Assembly);
-        configuration = configurationService.BuildConfiguration();
-
         AddModule(new LoggingStartupModule(new[]
         {
             LogTarget.BROWSER_CONSOLE,
         }));
 
         AddModule(new RefitStartupModule(apiBaseAddress));
-
-        AddModule(
-            new DatabaseContextStartupModule<RepairDatabaseContext>(configurationService.ConfigureDatabaseOptions));
-
-        AddModule(new EntityQueryServiceStartupModule<CustomerQueryService, Customer, SearchableCustomer>());
-        AddModule(new EntityQueryServiceStartupModule<OrderQueryService, Order, SearchableOrder>());
-#if DEBUG
-        AddModule(new BogusStartupModule(40));
-#endif
     }
 
     protected override void ConfigureApplication(IApplicationBuilder app)
@@ -77,13 +53,8 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
     {
         base.ConfigureServices(services);
 
-        services.AddSingleton(configurationService);
         services.AddSingleton<INavigationService, NavigationService>();
-        services.AddSingleton<IReportService, ReportService>();
         services.AddTransient<IReportApi, ReportApiAdapter>();
-
-        services.Configure<ReportDataSettings>(
-            configuration.GetSection(BackendConfigurationService.REPORT_DATA_SECTION));
 
         DispatcherQueue uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         services.AddSingleton(uiDispatcherQueue);

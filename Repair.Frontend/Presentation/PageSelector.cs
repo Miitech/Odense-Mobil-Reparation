@@ -1,5 +1,4 @@
 using Repair.Frontend.Abstraction;
-using Repair.Services;
 
 namespace Repair.Frontend.Presentation
 {
@@ -10,7 +9,7 @@ namespace Repair.Frontend.Presentation
     {
         public PageSelector(
             IServiceProvider serviceProvider, IEnumerable<IPageRegion> regionDefinitions,
-            INavigationService navigationService, ConfigurationService configurationService)
+            INavigationService navigationService)
         {
             ArgumentNullException.ThrowIfNull(serviceProvider);
             ArgumentNullException.ThrowIfNull(regionDefinitions);
@@ -21,7 +20,7 @@ namespace Repair.Frontend.Presentation
             Margin = new Thickness(0);
 
             var viewModel = (PageSelectorViewModel) DataContext;
-            var logic = new PageSelectorLogic(viewModel, serviceProvider, navigationService, configurationService);
+            var logic = new PageSelectorLogic(viewModel, serviceProvider, navigationService);
             var ui = new PageSelectorUi(logic, viewModel, regionDefinitions, navigationService);
 
             Content = ui.CreateContentGrid();

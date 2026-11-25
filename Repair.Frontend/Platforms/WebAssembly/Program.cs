@@ -1,14 +1,14 @@
-using Repair.Frontend;
+using Uno.UI.Hosting;
 
-namespace Resume;
+namespace Repair.Frontend;
 
 public class Program
 {
-    private static App? _app;
-
     public static int Main(string[] args)
     {
-        Application.Start(_ => _app = new App());
+        UnoPlatformHost host = UnoPlatformHostBuilder.Create().App(() => new App()).UseWebAssembly().Build();
+
+        host.Run();
 
         return 0;
     }

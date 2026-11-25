@@ -4,7 +4,7 @@
       "commandName": "Project",
       "compatibleTargetFramework": "browserwasm",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:8080",
+      "applicationUrl": "http://localhost:8081",
       "hotReloadEnabled": false
     }
   }

@@ -63,7 +63,7 @@ namespace Repair.Frontend.Presentation
             private Grid CreateNavigationPaneContentGrid()
             {
                 Grid paneRoot = GridFactory.CreateDefaultGrid().DefineRows(GridLength.Auto,
-                    new GridLength(1, GridUnitType.Star), GridLength.Auto);
+                    new GridLength(1, GridUnitType.Star));
 
                 paneRoot.Background = new SolidColorBrush(MenuBackgroundColour);
                 paneRoot.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -73,42 +73,8 @@ namespace Repair.Frontend.Presentation
 
                 paneRoot.Children.Add(CreateBackButton().SetRow(0));
                 paneRoot.Children.Add(ViewModel.MenuList.SetRow(1));
-                paneRoot.Children.Add(CreateOpenApplicationFolderButton().SetRow(2));
 
                 return paneRoot;
-            }
-
-            private Button CreateOpenApplicationFolderButton()
-            {
-                StackPanel contentPanel = new()
-                {
-                    Orientation = Orientation.Horizontal,
-                    Spacing = 8,
-                };
-
-                contentPanel.Children.Add(new SymbolIcon(Symbol.Folder));
-
-                contentPanel.Children.Add(new TextBlock
-                {
-                    Text = "Application Data",
-                    VerticalAlignment = VerticalAlignment.Center,
-                });
-
-                Button button = new()
-                {
-                    Content = contentPanel,
-                    Background = new SolidColorBrush(Colors.Transparent),
-                    Foreground = new SolidColorBrush(Colors.White),
-                    BorderThickness = new Thickness(0),
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    HorizontalContentAlignment = HorizontalAlignment.Left,
-                    Margin = new Thickness(5),
-                    Padding = new Thickness(10, 5, 10, 5),
-                };
-
-                button.Click += Logic.OpenApplicationFolderButtonClicked;
-
-                return button;
             }
 
             private Button CreateBackButton()

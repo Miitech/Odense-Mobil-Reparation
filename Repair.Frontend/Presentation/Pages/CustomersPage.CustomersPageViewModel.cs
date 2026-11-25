@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Repair.Models.Entity.Model;
 using System.Collections.ObjectModel;
 using Repair.Frontend.Presentation.Pieces;
 
