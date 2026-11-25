@@ -8,7 +8,7 @@ using Repair.Api.Exceptions;
 namespace Repair.Api.Controllers.Core;
 
 [ApiController]
-[Route(Constants.ROUTE_TEMPLATE)]
+[Route(ApiRoutes.CONTROLLER_TEMPLATE)]
 public abstract class
     EntityController<TEntity, TSearchable, TComplexSearchable, TAddDto, TUpdateDto, TGetDto, TController> :
     ControllerBase,
@@ -42,7 +42,7 @@ public abstract class
         return entity.Version.SequenceEqual(dto.Version);
     }
 
-    [HttpGet("{id:int:min(1)}")]
+    [HttpGet(nameof(GetSingle) + ApiRoutes.CONSTRAINED_ID)]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     public virtual async Task<TGetDto> GetSingle(int id)
@@ -59,7 +59,7 @@ public abstract class
         return CreateGetDto(entity);
     }
 
-    [HttpGet]
+    [HttpGet(nameof(GetAll))]
     [ProducesResponseType(200)]
     public virtual async Task<IEnumerable<TGetDto>> GetAll()
     {
@@ -68,7 +68,7 @@ public abstract class
         return entities.Select(CreateGetDto).ToList();
     }
 
-    [HttpPost]
+    [HttpPost(nameof(Search))]
     [ProducesResponseType(200)]
     public virtual async Task<IEnumerable<TGetDto>> Search([FromBody] TSearchable searchable)
     {
@@ -77,7 +77,7 @@ public abstract class
         return entities.Select(CreateGetDto).ToList();
     }
 
-    [HttpPost]
+    [HttpPost(nameof(SearchComplex))]
     [ProducesResponseType(200)]
     public virtual async Task<IEnumerable<TGetDto>> SearchComplex([FromBody] TComplexSearchable searchable)
     {
@@ -86,7 +86,7 @@ public abstract class
         return entities.Select(CreateGetDto).ToList();
     }
 
-    [HttpPost]
+    [HttpPost(nameof(AddSingle))]
     [ProducesResponseType(201)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public virtual async Task<TGetDto> AddSingle([FromBody] TAddDto dto)
@@ -104,7 +104,7 @@ public abstract class
         return CreateGetDto(entity);
     }
 
-    [HttpPost]
+    [HttpPost(nameof(AddMultiple))]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public virtual async Task<IEnumerable<TGetDto>> AddMultiple([FromBody] IEnumerable<TAddDto> dtos)
@@ -120,7 +120,7 @@ public abstract class
         return entities.Select(CreateGetDto).ToList();
     }
 
-    [HttpPut("{id:int:min(1)}")]
+    [HttpPut(nameof(UpdateSingle) + ApiRoutes.CONSTRAINED_ID)]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
@@ -163,7 +163,7 @@ public abstract class
         return CreateGetDto(entity);
     }
 
-    [HttpDelete("{id:int:min(1)}")]
+    [HttpDelete(nameof(DeleteSingle) + ApiRoutes.CONSTRAINED_ID)]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
     [ProducesResponseType(typeof(ProblemDetails), 409)]

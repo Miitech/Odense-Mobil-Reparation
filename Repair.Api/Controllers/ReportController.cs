@@ -10,7 +10,7 @@ using Repair.Models.Entity.Searchable;
 namespace Repair.Api.Controllers;
 
 [ApiController]
-[Route(Constants.ROUTE_TEMPLATE)]
+[Route(ApiRoutes.CONTROLLER_TEMPLATE)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class ReportController(
     IEntityQueryService<Customer, SearchableCustomer> customerQueryService,
@@ -18,7 +18,7 @@ public class ReportController(
     IReportService reportService,
     ILogger<ReportController> logger) : ControllerBase, IReportApi
 {
-    [HttpGet("{id:int:min(1)}")]
+    [HttpGet(nameof(GenerateOrderReport) + ApiRoutes.CONSTRAINED_ID)]
     [Produces("application/pdf")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -42,7 +42,7 @@ public class ReportController(
         return reportService.GenerateReport(order);
     }
 
-    [HttpGet("{id:int:min(1)}")]
+    [HttpGet(nameof(GenerateCustomerReport) + ApiRoutes.CONSTRAINED_ID)]
     [Produces("application/pdf")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
