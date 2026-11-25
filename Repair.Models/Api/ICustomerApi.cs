@@ -1,3 +1,4 @@
+using Refit;
 using Repair.Abstractions.Api;
 using Repair.Models.Dto.Add;
 using Repair.Models.Dto.Get;
@@ -7,11 +8,8 @@ using Repair.Models.Entity.Searchable;
 
 namespace Repair.Models.Api;
 
-public interface ICustomerApi : IEntityApi<
-    SearchableCustomer,
-    ComplexSearchableCustomer,
-    AddCustomerDto,
-    UpdateCustomerDto,
-    GetCustomerDto>
+[PathPrefix(ApiRoutes.CUSTOMER_PREFIX)]
+public interface ICustomerApi : IEntityApi<SearchableCustomer, ComplexSearchableCustomer, AddCustomerDto,
+    UpdateCustomerDto, GetCustomerDto>
 {
 }
