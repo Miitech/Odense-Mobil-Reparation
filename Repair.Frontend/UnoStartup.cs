@@ -1,20 +1,21 @@
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.UI.Dispatching;
+using Repair.Abstractions.Api;
 using Repair.Abstractions.Services;
 using Repair.Frontend.Abstraction;
 using Repair.Frontend.NavigationRegions;
 using Repair.Frontend.Services;
+using Repair.Frontend.Startup;
 using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 using Repair.Models.Settings;
 using Repair.Persistence;
 using Repair.Persistence.Services;
 using Repair.Services;
-using Repair.Frontend.Startup;
-using BackendConfigurationService = Repair.Services.ConfigurationService;
 using Repair.Startup;
 using Repair.Startup.Modules;
+using BackendConfigurationService = Repair.Services.ConfigurationService;
 
 namespace Repair.Frontend;
 
@@ -79,8 +80,10 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
         services.AddSingleton(configurationService);
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IReportService, ReportService>();
+        services.AddTransient<IReportApi, ReportApiAdapter>();
 
-        services.Configure<ReportDataSettings>(configuration.GetSection(BackendConfigurationService.REPORT_DATA_SECTION));
+        services.Configure<ReportDataSettings>(
+            configuration.GetSection(BackendConfigurationService.REPORT_DATA_SECTION));
 
         DispatcherQueue uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         services.AddSingleton(uiDispatcherQueue);

@@ -1,6 +1,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Net.Http.Headers;
 using Repair.Abstractions.Services;
 using Repair.Api.Handlers;
 using Repair.Api.Startup;
@@ -95,10 +96,9 @@ public class ApiStartup : ModularStartup<IApplicationBuilder>
 
         services.AddCors(options =>
         {
-            options.AddPolicy(CORS_POLICY, policy => policy
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod());
+            options.AddPolicy(CORS_POLICY,
+                policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
+                    .WithExposedHeaders(HeaderNames.ContentDisposition));
         });
     }
 }

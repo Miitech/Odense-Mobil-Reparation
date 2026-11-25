@@ -24,11 +24,11 @@ public class RefitStartupModule(Uri baseAddress) : IServiceStartupModule
     private void RegisterClient<TApi>(IServiceCollection services, RefitSettings settings)
         where TApi : class
     {
-        services.AddRefitClient<TApi>(settings)
+        services.AddRefitGeneratedClient<TApi>(settings)
             .ConfigureHttpClient(client => client.BaseAddress = baseAddress);
     }
 
-    private static RefitSettings CreateSettings()
+    private RefitSettings CreateSettings()
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
