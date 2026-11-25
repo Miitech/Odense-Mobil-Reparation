@@ -11,6 +11,8 @@ using Repair.Models.Settings;
 using Repair.Persistence;
 using Repair.Persistence.Services;
 using Repair.Services;
+using Repair.Frontend.Startup;
+using BackendConfigurationService = Repair.Services.ConfigurationService;
 using Repair.Startup;
 using Repair.Startup.Modules;
 
@@ -21,18 +23,19 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
     public IHost? Host { get; private set; }
 
     private readonly IConfiguration configuration;
-    private readonly ConfigurationService configurationService;
+    private readonly BackendConfigurationService configurationService;
 
-    public UnoStartup()
+    public UnoStartup(Uri apiBaseAddress)
     {
-        configurationService = new ConfigurationService(GetType().Assembly);
+        configurationService = new BackendConfigurationService(GetType().Assembly);
         configuration = configurationService.BuildConfiguration();
 
         AddModule(new LoggingStartupModule(new[]
         {
-            LogTarget.CONSOLE,
-            LogTarget.FILE,
-        }, configurationService.GetApplicationDataPath()));
+            LogTarget.BROWSER_CONSOLE,
+        }));
+
+        AddModule(new RefitStartupModule(apiBaseAddress));
 
         AddModule(
             new DatabaseContextStartupModule<RepairDatabaseContext>(configurationService.ConfigureDatabaseOptions));
@@ -77,7 +80,7 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IReportService, ReportService>();
 
-        services.Configure<ReportDataSettings>(configuration.GetSection(ConfigurationService.REPORT_DATA_SECTION));
+        services.Configure<ReportDataSettings>(configuration.GetSection(BackendConfigurationService.REPORT_DATA_SECTION));
 
         DispatcherQueue uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         services.AddSingleton(uiDispatcherQueue);

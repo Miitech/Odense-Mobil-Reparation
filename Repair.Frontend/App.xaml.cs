@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Repair.Frontend.Styles;
+using Repair.Frontend.Services;
 using Uno.Resizetizer;
 
 namespace Repair.Frontend;
@@ -21,11 +22,13 @@ public partial class App : Application
     internal static UnoStartup Startup { get; private set; } = null!;
 
     [SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Uno.Extensions APIs are used in a way that is safe for trimming in this template context.")]
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         //RequestedTheme = ApplicationTheme.Light;
 
-        Startup = new UnoStartup();
+        var configurationService = new ConfigurationService();
+        var deploymentConfiguration = await configurationService.BuildConfiguration();
+        Startup = new UnoStartup(configurationService.GetApiBaseAddress(deploymentConfiguration));
 
         // Load WinUI Resources
         Resources.Build(r => r.Merged(new XamlControlsResources()));
