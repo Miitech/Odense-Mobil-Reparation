@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Repair.Abstractions.Services;
+using Repair.Api.Handlers;
 using Repair.Api.Startup;
 using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
@@ -51,6 +52,8 @@ public class ApiStartup : ModularStartup<IApplicationBuilder>
     {
         base.ConfigureApplication(app);
 
+        app.UseExceptionHandler();
+
         if (app is not WebApplication webApplication)
             throw new InvalidOperationException(
                 $"Expected Supplied App to be of type {nameof(WebApplication)}, but it was a {app.GetType().Name}.");
@@ -77,6 +80,9 @@ public class ApiStartup : ModularStartup<IApplicationBuilder>
         {
             IncludeFields = true,
         });
+
+        services.AddExceptionHandler<ApiExceptionHandler>();
+        services.AddProblemDetails();
 
         services.AddControllers().AddJsonOptions(options =>
         {
