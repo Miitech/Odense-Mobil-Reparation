@@ -21,7 +21,7 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
             LogTarget.BROWSER_CONSOLE,
         }));
 
-        AddModule(new RefitStartupModule(apiBaseAddress));
+        AddModule(new RefitStartupModule(apiBaseAddress, QueueStartupLog));
     }
 
     protected override void ConfigureApplication(IApplicationBuilder app)

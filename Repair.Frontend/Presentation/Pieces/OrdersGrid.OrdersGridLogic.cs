@@ -30,36 +30,36 @@ internal sealed partial class OrdersGrid
 
         internal async void SearchChanged(object? sender, EventArgs e)
         {
+            await RefreshOrders();
+        }
+
+        public async Task RefreshOrders()
+        {
             try
             {
-                await RefreshOrders();
+                ComplexSearchableOrder searchable = CreateSearchableOrder();
+
+                List<GetOrderDto> orders = (await orderApi.SearchComplex(searchable)).ToList();
+                orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
+
+                logger.LogInformation(
+                    "Order search returned {OrderCount} orders. CustomerId filter: {CustomerId}, Fuzzy search: {UseFuzzySearch}",
+                    orders.Count, ViewModel.CustomerId, ViewModel.UseFuzzySearch);
+
+                uiDispatcher.TryEnqueue(() =>
+                {
+                    logger.LogDebug("Updating Orders collection. Existing count: {ExistingCount}", ViewModel.Orders.Count);
+
+                    ViewModel.Orders.ReplaceItems(orders);
+                    ViewModel.DataGrid.Refresh();
+
+                    logger.LogDebug("Orders collection updated. New count: {NewCount}", ViewModel.Orders.Count);
+                });
             }
             catch (Exception exe)
             {
                 logger.LogError(exe, "Exception caught during refresh of Orders");
             }
-        }
-
-        public async Task RefreshOrders()
-        {
-            ComplexSearchableOrder searchable = CreateSearchableOrder();
-
-            List<GetOrderDto> orders = (await orderApi.SearchComplex(searchable)).ToList();
-            orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
-
-            logger.LogInformation(
-                "Order search returned {OrderCount} orders. CustomerId filter: {CustomerId}, Fuzzy search: {UseFuzzySearch}",
-                orders.Count, ViewModel.CustomerId, ViewModel.UseFuzzySearch);
-
-            uiDispatcher.TryEnqueue(() =>
-            {
-                logger.LogDebug("Updating Orders collection. Existing count: {ExistingCount}", ViewModel.Orders.Count);
-
-                ViewModel.Orders.ReplaceItems(orders);
-                ViewModel.DataGrid.Refresh();
-
-                logger.LogDebug("Orders collection updated. New count: {NewCount}", ViewModel.Orders.Count);
-            });
         }
 
         private ComplexSearchableOrder CreateSearchableOrder()

@@ -36,7 +36,7 @@ namespace Repair.Frontend.Presentation.Factory
                 Padding = new Thickness(0),
             };
 
-            return button.Template(_ => CreateNullableBooleanOptionButtonTemplate());
+            return ControlMarkup.Template(button, CreateNullableBooleanOptionButtonTemplate);
         }
 
         private static Border CreateNullableBooleanOptionButtonTemplate()

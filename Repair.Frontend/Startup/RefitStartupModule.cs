@@ -5,10 +5,11 @@ using Refit;
 using Repair.Abstractions.Api;
 using Repair.Abstractions.Startup;
 using Repair.Models.Api;
+using Repair.Models.Serialization;
 
 namespace Repair.Frontend.Startup;
 
-public class RefitStartupModule(Uri baseAddress) : IServiceStartupModule
+public class RefitStartupModule(Uri baseAddress, Action<Action<ILogger>> queueStartupLog) : IServiceStartupModule
 {
     public string Name => "Refit Module";
 
@@ -21,11 +22,13 @@ public class RefitStartupModule(Uri baseAddress) : IServiceStartupModule
         RegisterClient<IReportHttpApi>(services, settings);
     }
 
-    private void RegisterClient<TApi>(IServiceCollection services, RefitSettings settings)
-        where TApi : class
+    private void RegisterClient<TApi>(IServiceCollection services, RefitSettings settings) where TApi : class
     {
         services.AddRefitGeneratedClient<TApi>(settings)
             .ConfigureHttpClient(client => client.BaseAddress = baseAddress);
+
+        queueStartupLog(logger => logger.LogDebug(
+            "Registered Refit client '{ApiName}' with base address '{BaseAddress}'.", typeof(TApi).Name, baseAddress));
     }
 
     private RefitSettings CreateSettings()
@@ -34,8 +37,8 @@ public class RefitStartupModule(Uri baseAddress) : IServiceStartupModule
         {
             IncludeFields = true,
             ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            TypeInfoResolver = ApiJsonSerializerContext.Default,
         };
-        options.Converters.Add(new JsonStringEnumConverter());
 
         return new RefitSettings
         {

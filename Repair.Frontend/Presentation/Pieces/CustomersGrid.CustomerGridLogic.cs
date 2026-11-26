@@ -30,42 +30,42 @@ internal sealed partial class CustomersGrid
 
         private async void SearchChanged(object? sender, EventArgs e)
         {
+            await RefreshCustomers();
+        }
+
+        public async Task RefreshCustomers()
+        {
             try
             {
-                await RefreshCustomers();
+                RememberSelectedCustomer();
+
+                ComplexSearchableCustomer searchable = CreateSearchableCustomer();
+
+                List<GetCustomerDto> customers = (await customerApi.SearchComplex(searchable)).ToList();
+                customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
+
+                logger.LogInformation("Customer search returned {CustomerCount} customers. Fuzzy search: {UseFuzzySearch}",
+                    customers.Count, ViewModel.UseFuzzySearch);
+
+                uiDispatcher.TryEnqueue(() =>
+                {
+                    logger.LogDebug("Updating Customers collection. Existing count: {ExistingCount}",
+                        ViewModel.Customers.Count);
+
+                    ViewModel.Customers.ReplaceItems(customers);
+                    ViewModel.DataGrid.Refresh();
+
+                    RestoreSelectedCustomer();
+
+                    logger.LogDebug(
+                        "Customers collection updated. New count: {NewCount}, SelectedCustomerId: {SelectedCustomerId}, SelectedCustomer: '{SelectedCustomerName}'",
+                        ViewModel.Customers.Count, ViewModel.SelectedCustomerId, ViewModel.SelectedCustomer?.Name);
+                });
             }
             catch (Exception exe)
             {
                 logger.LogError(exe, "Exception caught during refresh of Customers");
             }
-        }
-
-        public async Task RefreshCustomers()
-        {
-            RememberSelectedCustomer();
-
-            ComplexSearchableCustomer searchable = CreateSearchableCustomer();
-
-            List<GetCustomerDto> customers = (await customerApi.SearchComplex(searchable)).ToList();
-            customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
-
-            logger.LogInformation("Customer search returned {CustomerCount} customers. Fuzzy search: {UseFuzzySearch}",
-                customers.Count, ViewModel.UseFuzzySearch);
-
-            uiDispatcher.TryEnqueue(() =>
-            {
-                logger.LogDebug("Updating Customers collection. Existing count: {ExistingCount}",
-                    ViewModel.Customers.Count);
-
-                ViewModel.Customers.ReplaceItems(customers);
-                ViewModel.DataGrid.Refresh();
-
-                RestoreSelectedCustomer();
-
-                logger.LogDebug(
-                    "Customers collection updated. New count: {NewCount}, SelectedCustomerId: {SelectedCustomerId}, SelectedCustomer: '{SelectedCustomerName}'",
-                    ViewModel.Customers.Count, ViewModel.SelectedCustomerId, ViewModel.SelectedCustomer?.Name);
-            });
         }
 
         private void RememberSelectedCustomer()

@@ -4,12 +4,10 @@ namespace Repair.Frontend;
 
 public class Program
 {
-    public static int Main(string[] args)
+    public static async Task Main(string[] args)
     {
         UnoPlatformHost host = UnoPlatformHostBuilder.Create().App(() => new App()).UseWebAssembly().Build();
 
-        host.Run();
-
-        return 0;
+        await host.RunAsync();
     }
 }

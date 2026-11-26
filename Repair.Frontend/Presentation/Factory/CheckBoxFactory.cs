@@ -14,7 +14,7 @@ internal static class CheckBoxFactory
             MinHeight = 32,
         };
 
-        checkBox.Template(_ => CreateLightCheckBoxTemplate());
+        ControlMarkup.Template(checkBox, CreateLightCheckBoxTemplate);
 
         checkBox.SetBinding(ToggleButton.IsCheckedProperty, new Binding
         {

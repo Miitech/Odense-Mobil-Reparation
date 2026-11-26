@@ -19,7 +19,7 @@ internal static class TextBoxFactory
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        textBox.Template(_ => CreateLightTextBoxTemplate());
+        TextBoxMarkup.Template(textBox, CreateLightTextBoxTemplate);
 
         textBox.SetBinding(TextBox.TextProperty, new Binding
         {
