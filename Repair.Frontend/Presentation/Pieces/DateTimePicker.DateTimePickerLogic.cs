@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml.Automation.Peers;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Automation.Provider;
 using Repair.Frontend.Presentation.Core;
 
@@ -19,8 +19,21 @@ internal sealed partial class DateTimePicker
             OpenPicker(ViewModel.TimePicker);
         }
 
+        public void ClearButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.CanClear)
+            {
+                ViewModel.SetSelectedDateTime(null);
+            }
+        }
+
         private void OpenPicker(FrameworkElement picker)
         {
+            if (ViewModel.IsReadOnly)
+            {
+                return;
+            }
+
             picker.Visibility = Visibility.Visible;
             picker.UpdateLayout();
 

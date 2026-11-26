@@ -17,9 +17,21 @@ internal sealed partial class DateTimePicker : Border
         Child = ui.CreateContentGrid();
     }
 
+    internal void SetReadOnly(bool isReadOnly)
+    {
+        ViewModel.IsReadOnly = isReadOnly;
+
+        ViewModel.DateButton.IsHitTestVisible = !isReadOnly;
+        ViewModel.DateButton.IsTabStop = !isReadOnly;
+
+        ViewModel.TimeButton.IsHitTestVisible = !isReadOnly;
+        ViewModel.TimeButton.IsTabStop = !isReadOnly;
+    }
+
     internal record DateTimePickerArguments(
         string Header,
         ILoggerFactory LoggerFactory,
         DateTime? InitialValue = null,
-        int MinuteIncrement = 5);
+        int MinuteIncrement = 5,
+        bool AllowClear = false);
 }

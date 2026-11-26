@@ -65,7 +65,7 @@ internal sealed partial class OrderEditor
         private DateTimePicker CreateReturnedWhenPicker()
         {
             DateTimePicker.DateTimePickerArguments arguments = Logic.GetArgumentsFactory()
-                .CreateDateTimePickerArguments("Returned at?", ViewModel.Arguments.Order?.ReturnedWhen);
+                .CreateDateTimePickerArguments("Returned at?", ViewModel.Arguments.Order?.ReturnedWhen, allowClear: true);
 
             ViewModel.ReturnedWhenPicker = new DateTimePicker(arguments);
 

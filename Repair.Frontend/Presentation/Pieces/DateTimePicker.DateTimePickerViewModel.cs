@@ -4,16 +4,21 @@ internal sealed partial class DateTimePicker
 {
     internal sealed partial class DateTimePickerViewModel : ObservableObject
     {
-        private bool shouldSkipNextDateChange = true;
-        private bool shouldSkipNextTimeChange = true;
+        private bool isSettingDateTime;
+
+        [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanClear))]
+        private bool isReadOnly;
+
+        public bool CanClear => Arguments.AllowClear && !IsReadOnly &&
+                                (SelectedDate.HasValue || SelectedTime.HasValue);
 
         public DateTimePickerArguments Arguments { get; }
         public event EventHandler? SelectedDateTimeChanged;
 
-        [ObservableProperty] [NotifyPropertyChangedFor(nameof(SelectedDateText))]
+        [ObservableProperty] [NotifyPropertyChangedFor(nameof(SelectedDateText))] [NotifyPropertyChangedFor(nameof(CanClear))]
         private DateTimeOffset? selectedDate;
 
-        [ObservableProperty] [NotifyPropertyChangedFor(nameof(SelectedTimeText))]
+        [ObservableProperty] [NotifyPropertyChangedFor(nameof(SelectedTimeText))] [NotifyPropertyChangedFor(nameof(CanClear))]
         private TimeSpan? selectedTime;
 
         private readonly ILogger<DateTimePickerViewModel> logger;
@@ -38,8 +43,22 @@ internal sealed partial class DateTimePicker
 
         internal void SetSelectedDateTime(DateTime? dateTime)
         {
-            SelectedDate = dateTime;
-            SelectedTime = dateTime?.TimeOfDay;
+            DateTime? previous = SelectedDateTime;
+            isSettingDateTime = true;
+            try
+            {
+                SelectedDate = dateTime;
+                SelectedTime = dateTime?.TimeOfDay;
+            }
+            finally
+            {
+                isSettingDateTime = false;
+            }
+
+            if (previous != SelectedDateTime)
+            {
+                RaiseSelectedDateTimeChanged();
+            }
         }
 
         internal DateTime? SelectedDateTime =>
@@ -52,33 +71,26 @@ internal sealed partial class DateTimePicker
 
         partial void OnSelectedDateChanged(DateTimeOffset? value)
         {
-            if (shouldSkipNextDateChange)
-            {
-                shouldSkipNextDateChange = false;
-                return;
-            }
-
             RaiseSelectedDateTimeChangedIfComplete();
         }
 
         partial void OnSelectedTimeChanged(TimeSpan? value)
         {
-            if (shouldSkipNextTimeChange)
-            {
-                shouldSkipNextTimeChange = false;
-                return;
-            }
-
             RaiseSelectedDateTimeChangedIfComplete();
         }
 
         private void RaiseSelectedDateTimeChangedIfComplete()
         {
-            if (!SelectedDate.HasValue || !SelectedTime.HasValue)
+            if (isSettingDateTime || !SelectedDateTime.HasValue)
             {
                 return;
             }
 
+            RaiseSelectedDateTimeChanged();
+        }
+
+        private void RaiseSelectedDateTimeChanged()
+        {
             logger.LogDebug("Date/time changed for '{ArgumentsHeader}'", Arguments.Header);
             SelectedDateTimeChanged?.Invoke(this, EventArgs.Empty);
         }

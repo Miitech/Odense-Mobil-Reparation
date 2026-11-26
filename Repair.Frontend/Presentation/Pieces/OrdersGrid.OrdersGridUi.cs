@@ -218,7 +218,8 @@ internal sealed partial class OrdersGrid
         {
             return column switch
             {
-                OrderGridColumns.RETURNED_WHEN => new NullableDateTimeConverter($"No Date/Time Set"),
+                OrderGridColumns.HANDED_IN_WHEN => new DateTimeConverter("No Date/Time Set"),
+                OrderGridColumns.RETURNED_WHEN => new DateTimeConverter("No Date/Time Set"),
                 OrderGridColumns.IS_ORDER_COMPLETE => new BooleanConverter(),
                 OrderGridColumns.BORROWED_PHONE => new NullableStringConverter("No Borrowed Phone"),
                 var _ => null,

@@ -28,11 +28,8 @@ internal sealed partial class OrderEditor
 
             ViewModel.IsOrderCompleteCheckBox.IsEnabled = isEditable;
 
-            ViewModel.HandInWhenPicker.ViewModel.DateButton.IsHitTestVisible = isEditable;
-            ViewModel.HandInWhenPicker.ViewModel.TimeButton.IsHitTestVisible = isEditable;
-
-            ViewModel.ReturnedWhenPicker.ViewModel.DateButton.IsHitTestVisible = isEditable;
-            ViewModel.ReturnedWhenPicker.ViewModel.TimeButton.IsHitTestVisible = isEditable;
+            ViewModel.HandInWhenPicker.SetReadOnly(ViewModel.IsReadOnly);
+            ViewModel.ReturnedWhenPicker.SetReadOnly(ViewModel.IsReadOnly);
 
             ViewModel.CustomersGrid.ViewModel.DataGrid.IsHitTestVisible = isEditable;
         }

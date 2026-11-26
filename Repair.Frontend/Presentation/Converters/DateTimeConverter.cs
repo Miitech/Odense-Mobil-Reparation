@@ -1,6 +1,6 @@
 namespace Repair.Frontend.Presentation.Converters;
 
-internal sealed class NullableDateTimeConverter(string nullText) : IValueConverter
+internal sealed class DateTimeConverter(string nullText) : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {

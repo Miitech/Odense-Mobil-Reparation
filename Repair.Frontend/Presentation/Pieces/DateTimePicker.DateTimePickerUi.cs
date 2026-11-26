@@ -41,6 +41,12 @@ internal sealed partial class DateTimePicker
             grid.HorizontalAlignment = HorizontalAlignment.Stretch;
             grid.DefineColumns(GridUnitType.Star, [1, 1,]);
 
+            if (ViewModel.Arguments.AllowClear)
+            {
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                grid.Children.Add(CreateClearButton().SetColumn(2));
+            }
+
             Grid dateGrid = CreateDatePickerHost().SetColumn(0);
             Grid timeGrid = CreateTimePickerHost().SetColumn(1);
 
@@ -48,6 +54,24 @@ internal sealed partial class DateTimePicker
             grid.Children.Add(timeGrid);
 
             return grid;
+        }
+
+        private Button CreateClearButton()
+        {
+            Button button = new()
+            {
+                Content = "×",
+                VerticalAlignment = VerticalAlignment.Stretch,
+                MinWidth = 36,
+            };
+
+            button.SetBinding(Control.IsEnabledProperty, new Binding
+            {
+                Path = new PropertyPath(nameof(DateTimePickerViewModel.CanClear)),
+                Mode = BindingMode.OneWay,
+            });
+            button.Click += Logic.ClearButtonClicked;
+            return button;
         }
 
         private Grid CreateDatePickerHost()
@@ -110,7 +134,7 @@ internal sealed partial class DateTimePicker
 
             ViewModel.DatePicker = picker;
 
-            picker.SetBinding(DatePicker.DateProperty, new Binding
+            picker.SetBinding(DatePicker.SelectedDateProperty, new Binding
             {
                 Path = new PropertyPath(nameof(DateTimePickerViewModel.SelectedDate)),
                 Mode = BindingMode.TwoWay,
@@ -148,13 +172,14 @@ internal sealed partial class DateTimePicker
                 Height = 1,
                 Opacity = 0,
                 IsHitTestVisible = false,
+                ClockIdentifier = Windows.Globalization.ClockIdentifiers.TwentyFourHour,
                 MinuteIncrement = ViewModel.Arguments.MinuteIncrement,
                 Visibility = Visibility.Collapsed,
             };
 
             ViewModel.TimePicker = picker;
 
-            picker.SetBinding(TimePicker.TimeProperty, new Binding
+            picker.SetBinding(TimePicker.SelectedTimeProperty, new Binding
             {
                 Path = new PropertyPath(nameof(DateTimePickerViewModel.SelectedTime)),
                 Mode = BindingMode.TwoWay,
