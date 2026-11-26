@@ -36,12 +36,12 @@ namespace Repair.Frontend.Presentation.Factory
                 Padding = new Thickness(0),
             };
 
-            return ControlMarkup.Template(button, CreateNullableBooleanOptionButtonTemplate);
+            return ControlMarkup.Template(button, () => CreateNullableBooleanOptionButtonTemplate(button));
         }
 
-        private static Border CreateNullableBooleanOptionButtonTemplate()
+        private static Border CreateNullableBooleanOptionButtonTemplate(RadioButton button)
         {
-            Border border = CreateNullableBooleanOptionButtonBorder();
+            Border border = CreateNullableBooleanOptionButtonBorder(button);
 
             ContentPresenter content = new()
             {
@@ -49,14 +49,14 @@ namespace Repair.Frontend.Presentation.Factory
                 HorizontalAlignment = HorizontalAlignment.Center,
             };
 
-            content.SetBinding(ContentPresenter.ContentProperty, CreateTemplateBinding(nameof(ContentControl.Content)));
+            content.SetBinding(ContentPresenter.ContentProperty, CreateTemplateBinding(button, nameof(ContentControl.Content)));
 
             border.Child = content;
 
             return border;
         }
 
-        private static Border CreateNullableBooleanOptionButtonBorder()
+        private static Border CreateNullableBooleanOptionButtonBorder(RadioButton button)
         {
             Border border = new()
             {
@@ -66,37 +66,35 @@ namespace Repair.Frontend.Presentation.Factory
                 Padding = new Thickness(8, 0, 8, 0),
             };
 
-            border.SetBinding(Border.BackgroundProperty, CreateCheckedBackgroundBinding());
-            border.SetBinding(Border.BorderBrushProperty, CreateCheckedBorderBrushBinding());
+            border.SetBinding(Border.BackgroundProperty, CreateCheckedBackgroundBinding(button));
+            border.SetBinding(Border.BorderBrushProperty, CreateCheckedBorderBrushBinding(button));
 
             return border;
         }
 
-        private static Binding CreateCheckedBackgroundBinding()
+        private static Binding CreateCheckedBackgroundBinding(RadioButton button)
         {
-            Binding binding = CreateTemplateBinding(nameof(ToggleButton.IsChecked));
+            Binding binding = CreateTemplateBinding(button, nameof(ToggleButton.IsChecked));
             binding.Converter = new CheckedToBackgroundBrushConverter();
 
             return binding;
         }
 
-        private static Binding CreateCheckedBorderBrushBinding()
+        private static Binding CreateCheckedBorderBrushBinding(RadioButton button)
         {
-            Binding binding = CreateTemplateBinding(nameof(ToggleButton.IsChecked));
+            Binding binding = CreateTemplateBinding(button, nameof(ToggleButton.IsChecked));
             binding.Converter = new CheckedToBorderBrushConverter();
 
             return binding;
         }
 
-        private static Binding CreateTemplateBinding(string propertyName)
+        private static Binding CreateTemplateBinding(RadioButton button, string propertyName)
         {
             return new Binding
             {
-                RelativeSource = new RelativeSource
-                {
-                    Mode = RelativeSourceMode.TemplatedParent,
-                },
+                Source = button,
                 Path = new PropertyPath(propertyName),
+                Mode = BindingMode.OneWay,
             };
         }
     }

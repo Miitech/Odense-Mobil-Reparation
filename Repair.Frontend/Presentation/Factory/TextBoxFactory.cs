@@ -19,7 +19,7 @@ internal static class TextBoxFactory
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        TextBoxMarkup.Template(textBox, CreateLightTextBoxTemplate);
+        TextBoxMarkup.Template(textBox, () => CreateLightTextBoxTemplate(textBox));
 
         textBox.SetBinding(TextBox.TextProperty, new Binding
         {
@@ -42,13 +42,13 @@ internal static class TextBoxFactory
         return textBox;
     }
 
-    private static Grid CreateLightTextBoxTemplate()
+    private static Grid CreateLightTextBoxTemplate(TextBox textBox)
     {
         Grid grid = CreateTemplateGrid();
-        TextBlock header = CreateHeaderTextBlock();
-        Border border = CreateInputBorder();
+        TextBlock header = CreateHeaderTextBlock(textBox);
+        Border border = CreateInputBorder(textBox);
 
-        border.Child = CreateInputGrid();
+        border.Child = CreateInputGrid(textBox);
 
         grid.Children.Add(header);
         grid.Children.Add(border.SetRow(1));
@@ -65,28 +65,28 @@ internal static class TextBoxFactory
         return grid;
     }
 
-    private static TextBlock CreateHeaderTextBlock()
+    private static TextBlock CreateHeaderTextBlock(TextBox textBox)
     {
         TextBlock header = TextBlockFactory.CreateBlackText().SetRow(0);
 
         header.Margin = new Thickness(6, 4, 8, 0);
 
-        header.SetBinding(TextBlock.TextProperty, CreateTemplateBinding(nameof(TextBox.Header)));
+        header.SetBinding(TextBlock.TextProperty, CreateTemplateBinding(textBox, nameof(TextBox.Header)));
 
         return header;
     }
 
-    private static Grid CreateInputGrid()
+    private static Grid CreateInputGrid(TextBox textBox)
     {
         Grid inputGrid = GridFactory.CreateDefaultGrid();
 
-        inputGrid.Children.Add(CreatePlaceholderTextBlock());
+        inputGrid.Children.Add(CreatePlaceholderTextBlock(textBox));
         inputGrid.Children.Add(CreateContentElement());
 
         return inputGrid;
     }
 
-    private static TextBlock CreatePlaceholderTextBlock()
+    private static TextBlock CreatePlaceholderTextBlock(TextBox textBox)
     {
         TextBlock placeholder = TextBlockFactory.CreateBlackText();
 
@@ -94,8 +94,8 @@ internal static class TextBoxFactory
         placeholder.VerticalAlignment = VerticalAlignment.Center;
         placeholder.IsHitTestVisible = false;
 
-        placeholder.SetBinding(TextBlock.TextProperty, CreateTemplateBinding(nameof(TextBox.PlaceholderText)));
-        placeholder.SetBinding(UIElement.VisibilityProperty, CreatePlaceholderVisibilityBinding());
+        placeholder.SetBinding(TextBlock.TextProperty, CreateTemplateBinding(textBox, nameof(TextBox.PlaceholderText)));
+        placeholder.SetBinding(UIElement.VisibilityProperty, CreatePlaceholderVisibilityBinding(textBox));
 
         return placeholder;
     }
@@ -112,7 +112,7 @@ internal static class TextBoxFactory
         };
     }
 
-    private static Border CreateInputBorder()
+    private static Border CreateInputBorder(TextBox textBox)
     {
         Border border = new()
         {
@@ -123,34 +123,32 @@ internal static class TextBoxFactory
             Padding = new Thickness(8, 0, 8, 0),
         };
 
-        border.SetBinding(Border.BorderBrushProperty, CreateFocusedBorderBrushBinding());
+        border.SetBinding(Border.BorderBrushProperty, CreateFocusedBorderBrushBinding(textBox));
 
         return border;
     }
 
-    private static Binding CreateFocusedBorderBrushBinding()
+    private static Binding CreateFocusedBorderBrushBinding(TextBox textBox)
     {
-        Binding binding = CreateTemplateBinding(nameof(TextBox.FocusState));
+        Binding binding = CreateTemplateBinding(textBox, nameof(TextBox.FocusState));
         binding.Converter = new FocusStateToBorderBrushConverter();
 
         return binding;
     }
 
-    private static Binding CreateTemplateBinding(string propertyName)
+    private static Binding CreateTemplateBinding(TextBox textBox, string propertyName)
     {
         return new Binding
         {
-            RelativeSource = new RelativeSource
-            {
-                Mode = RelativeSourceMode.TemplatedParent,
-            },
+            Source = textBox,
             Path = new PropertyPath(propertyName),
+            Mode = BindingMode.OneWay,
         };
     }
 
-    private static Binding CreatePlaceholderVisibilityBinding()
+    private static Binding CreatePlaceholderVisibilityBinding(TextBox textBox)
     {
-        Binding binding = CreateTemplateBinding(nameof(TextBox.Text));
+        Binding binding = CreateTemplateBinding(textBox, nameof(TextBox.Text));
         binding.Converter = new EmptyTextToVisibilityConverter();
 
         return binding;

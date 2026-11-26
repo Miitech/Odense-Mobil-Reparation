@@ -14,7 +14,7 @@ internal static class CheckBoxFactory
             MinHeight = 32,
         };
 
-        ControlMarkup.Template(checkBox, CreateLightCheckBoxTemplate);
+        ControlMarkup.Template(checkBox, () => CreateLightCheckBoxTemplate(checkBox));
 
         checkBox.SetBinding(ToggleButton.IsCheckedProperty, new Binding
         {
@@ -43,17 +43,17 @@ internal static class CheckBoxFactory
         return grid;
     }
 
-    private static Border CreateLightCheckBoxTemplate()
+    private static Border CreateLightCheckBoxTemplate(CheckBox checkBox)
     {
-        Border box = CreateCheckBoxBorder();
+        Border box = CreateCheckBoxBorder(checkBox);
 
-        TextBlock checkMark = CreateCheckMark();
+        TextBlock checkMark = CreateCheckMark(checkBox);
         box.Child = checkMark;
 
         return box;
     }
 
-    private static Border CreateCheckBoxBorder()
+    private static Border CreateCheckBoxBorder(CheckBox checkBox)
     {
         Border border = new()
         {
@@ -65,13 +65,13 @@ internal static class CheckBoxFactory
             CornerRadius = new CornerRadius(4),
         };
 
-        border.SetBinding(Border.BackgroundProperty, CreateCheckedBackgroundBinding());
-        border.SetBinding(Border.BorderBrushProperty, CreateCheckedBorderBrushBinding());
+        border.SetBinding(Border.BackgroundProperty, CreateCheckedBackgroundBinding(checkBox));
+        border.SetBinding(Border.BorderBrushProperty, CreateCheckedBorderBrushBinding(checkBox));
 
         return border;
     }
 
-    private static TextBlock CreateCheckMark()
+    private static TextBlock CreateCheckMark(CheckBox checkBox)
     {
         TextBlock checkMark = TextBlockFactory.CreateBlackText();
 
@@ -81,44 +81,42 @@ internal static class CheckBoxFactory
         checkMark.HorizontalAlignment = HorizontalAlignment.Center;
         checkMark.VerticalAlignment = VerticalAlignment.Center;
 
-        checkMark.SetBinding(UIElement.VisibilityProperty, CreateCheckedVisibilityBinding());
+        checkMark.SetBinding(UIElement.VisibilityProperty, CreateCheckedVisibilityBinding(checkBox));
 
         return checkMark;
     }
 
-    private static Binding CreateCheckedBackgroundBinding()
+    private static Binding CreateCheckedBackgroundBinding(CheckBox checkBox)
     {
-        Binding binding = CreateTemplateBinding(nameof(CheckBox.IsChecked));
+        Binding binding = CreateTemplateBinding(checkBox, nameof(CheckBox.IsChecked));
         binding.Converter = new CheckedToBackgroundBrushConverter();
 
         return binding;
     }
 
-    private static Binding CreateCheckedBorderBrushBinding()
+    private static Binding CreateCheckedBorderBrushBinding(CheckBox checkBox)
     {
-        Binding binding = CreateTemplateBinding(nameof(CheckBox.IsChecked));
+        Binding binding = CreateTemplateBinding(checkBox, nameof(CheckBox.IsChecked));
         binding.Converter = new CheckedToBorderBrushConverter();
 
         return binding;
     }
 
-    private static Binding CreateCheckedVisibilityBinding()
+    private static Binding CreateCheckedVisibilityBinding(CheckBox checkBox)
     {
-        Binding binding = CreateTemplateBinding(nameof(CheckBox.IsChecked));
+        Binding binding = CreateTemplateBinding(checkBox, nameof(CheckBox.IsChecked));
         binding.Converter = new CheckedToVisibilityConverter();
 
         return binding;
     }
 
-    private static Binding CreateTemplateBinding(string propertyName)
+    private static Binding CreateTemplateBinding(CheckBox checkBox, string propertyName)
     {
         return new Binding
         {
-            RelativeSource = new RelativeSource
-            {
-                Mode = RelativeSourceMode.TemplatedParent,
-            },
+            Source = checkBox,
             Path = new PropertyPath(propertyName),
+            Mode = BindingMode.OneWay,
         };
     }
 
