@@ -5,7 +5,7 @@ using Repair.Models.Entity.Model;
 using Repair.Models.Entity.Searchable;
 using Repair.Services;
 
-namespace Repair.Startup.Modules;
+namespace Repair.Api.Startup;
 
 public class BogusStartupModule(int minimumCustomersTarget) : IServiceStartupModule
 {

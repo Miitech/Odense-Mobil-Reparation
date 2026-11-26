@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Repair.Abstractions.Persistence;
 using Repair.Abstractions.Startup;
 
-namespace Repair.Startup.Modules;
+namespace Repair.Api.Startup;
 
 public class EntityQueryServiceStartupModule<TQuery, TEntity, TSearchable> : IServiceStartupModule
     where TQuery : class, IEntityQueryService<TEntity, TSearchable>

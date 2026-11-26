@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Repair.Abstractions.Startup;
 using Repair.Persistence.Core;
 
-namespace Repair.Startup.Modules;
+namespace Repair.Api.Startup;
 
 public class DatabaseContextStartupModule<TContext> : IServiceStartupModule
     where TContext : BaseDatabaseContext<TContext>
