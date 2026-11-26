@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Repair.Api\Repair.Api.csproj" />
     <ProjectReference Include="..\Repair.Persistence\Repair.Persistence.csproj" />
     <ProjectReference Include="..\Repair.Tests.Shared\Repair.Tests.Shared.csproj" />
   </ItemGroup>
