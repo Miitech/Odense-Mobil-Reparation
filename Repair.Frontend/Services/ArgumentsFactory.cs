@@ -1,3 +1,4 @@
+using Repair.Frontend.Settings;
 using Repair.Models.Dto.Get;
 using Repair.Abstractions.Api;
 using Repair.Models.Api;
@@ -15,7 +16,8 @@ internal class ArgumentsFactory(
     IUiDispatcher uiDispatcher,
     ILoggerFactory loggerFactory,
     INavigationService navigationService,
-    IReportApi reportApi)
+    IReportApi reportApi,
+    SearchSettings searchSettings)
 {
     internal CustomerDetailsPage.CustomerDetailsPageArguments CreateCustomerDetailsPageArguments(int customerId)
     {
@@ -25,7 +27,7 @@ internal class ArgumentsFactory(
 
     internal OrdersGrid.OrdersGridArguments CreateOrderGridArguments(int customerId = 0)
     {
-        return new OrdersGrid.OrdersGridArguments(orderApi, uiDispatcher, loggerFactory, customerId);
+        return new OrdersGrid.OrdersGridArguments(orderApi, uiDispatcher, loggerFactory, customerId, searchSettings.DebounceDelayMilliseconds);
     }
 
     internal CustomersPage.CustomersPageArguments CreateCustomersPageArguments()
@@ -70,7 +72,7 @@ internal class ArgumentsFactory(
     internal CustomersGrid.CustomersGridArguments CreateCustomersGridArguments(int selectedCustomerId = 0)
     {
         return new CustomersGrid.CustomersGridArguments(customerApi, uiDispatcher, loggerFactory,
-            selectedCustomerId);
+            selectedCustomerId, searchSettings.DebounceDelayMilliseconds);
     }
 
     internal OrderEditor.OrderEditorArguments CreateOrderEditorArguments(

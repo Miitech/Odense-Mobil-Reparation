@@ -11,6 +11,7 @@ internal sealed partial class CustomersGrid
         public CustomersGridArguments Arguments { get; } = arguments;
 
         public event EventHandler? SearchChanged;
+        public event EventHandler? SearchTextChanged;
         public event EventHandler? CustomerSelectionChanged;
 
         internal DataGrid DataGrid { get; set; } = null!;
@@ -36,7 +37,7 @@ internal sealed partial class CustomersGrid
 
         private void CustomerEditorSearchChanged(object? sender, EventArgs e)
         {
-            SearchChanged?.Invoke(this, EventArgs.Empty);
+            SearchTextChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public string SearchModeText =>

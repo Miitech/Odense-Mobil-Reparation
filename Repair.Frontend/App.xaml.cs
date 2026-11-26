@@ -32,7 +32,8 @@ public partial class App : Application
 
             IConfiguration deploymentConfiguration = await configurationService.BuildConfiguration();
 
-            Startup = new UnoStartup(configurationService.GetApiBaseAddress(deploymentConfiguration));
+            Startup = new UnoStartup(configurationService.GetApiBaseAddress(deploymentConfiguration),
+                configurationService.GetSearchSettings(deploymentConfiguration));
 
             // Load WinUI Resources
             Resources.Build(r => r.Merged(new XamlControlsResources()));

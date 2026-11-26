@@ -11,6 +11,7 @@ internal sealed partial class OrdersGrid
         public OrdersGridArguments Arguments { get; } = arguments;
 
         public event EventHandler? SearchChanged;
+        public event EventHandler? SearchTextChanged;
 
         internal DataGrid DataGrid { get; set; } = null!;
         internal TextBox HandInWhatSearchBox { get; set; } = null!;
@@ -55,17 +56,17 @@ internal sealed partial class OrdersGrid
 
         partial void OnHandInWhatSearchTextChanged(string value)
         {
-            FireSearchChanged();
+            SearchTextChanged?.Invoke(this, EventArgs.Empty);
         }
 
         partial void OnRepairWhatSearchTextChanged(string value)
         {
-            FireSearchChanged();
+            SearchTextChanged?.Invoke(this, EventArgs.Empty);
         }
 
         partial void OnCustomerNameSearchTextChanged(string value)
         {
-            FireSearchChanged();
+            SearchTextChanged?.Invoke(this, EventArgs.Empty);
         }
 
         partial void OnIsOrderCompleteChanged(bool? value)
@@ -75,7 +76,7 @@ internal sealed partial class OrdersGrid
 
         partial void OnBorrowedPhoneSearchTextChanged(string value)
         {
-            FireSearchChanged();
+            SearchTextChanged?.Invoke(this, EventArgs.Empty);
         }
 
         partial void OnUseFuzzySearchChanged(bool value)

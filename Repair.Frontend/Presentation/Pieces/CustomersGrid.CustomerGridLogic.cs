@@ -1,3 +1,4 @@
+using Repair.Frontend.Services;
 using Repair.Models.Dto.Get;
 using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
@@ -16,6 +17,7 @@ internal sealed partial class CustomersGrid
     internal sealed partial class CustomersGridLogic : BaseLogic<CustomersGridViewModel>
     {
         private readonly ICustomerApi customerApi;
+        private readonly Debouncer debouncer;
         private readonly IUiDispatcher uiDispatcher;
         private readonly ILogger<CustomersGridLogic> logger;
 
@@ -25,7 +27,9 @@ internal sealed partial class CustomersGrid
             uiDispatcher = ViewModel.Arguments.UiDispatcher;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<CustomersGridLogic>();
 
+            debouncer = new Debouncer(ViewModel.Arguments.DebounceDelayMilliseconds);
             ViewModel.SearchChanged += SearchChanged;
+            ViewModel.SearchTextChanged += SearchTextChanged;
         }
 
         private async void SearchChanged(object? sender, EventArgs e)
@@ -33,7 +37,16 @@ internal sealed partial class CustomersGrid
             await RefreshCustomers();
         }
 
-        public async Task RefreshCustomers()
+        private async void SearchTextChanged(object? sender, EventArgs e)
+        {
+            await debouncer.Run(SearchCustomers, delayed: true);
+        }
+
+        public void CancelPendingRefresh() => debouncer.Cancel();
+
+        public Task RefreshCustomers() => debouncer.Run(SearchCustomers, delayed: false);
+
+        private async Task SearchCustomers(CancellationToken cancellationToken)
         {
             try
             {
@@ -42,30 +55,50 @@ internal sealed partial class CustomersGrid
                 ComplexSearchableCustomer searchable = CreateSearchableCustomer();
 
                 List<GetCustomerDto> customers = (await customerApi.SearchComplex(searchable)).ToList();
-                customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
-
-                logger.LogInformation("Customer search returned {CustomerCount} customers. Fuzzy search: {UseFuzzySearch}",
-                    customers.Count, ViewModel.UseFuzzySearch);
-
-                uiDispatcher.TryEnqueue(() =>
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    logger.LogDebug("Updating Customers collection. Existing count: {ExistingCount}",
-                        ViewModel.Customers.Count);
+                    return;
+                }
 
-                    ViewModel.Customers.ReplaceItems(customers);
-                    ViewModel.DataGrid.Refresh();
-
-                    RestoreSelectedCustomer();
-
-                    logger.LogDebug(
-                        "Customers collection updated. New count: {NewCount}, SelectedCustomerId: {SelectedCustomerId}, SelectedCustomer: '{SelectedCustomerName}'",
-                        ViewModel.Customers.Count, ViewModel.SelectedCustomerId, ViewModel.SelectedCustomer?.Name);
-                });
+                ApplySearchResults(customers, cancellationToken);
             }
             catch (Exception exe)
             {
                 logger.LogError(exe, "Exception caught during refresh of Customers");
             }
+        }
+
+        private void ApplySearchResults(List<GetCustomerDto> customers, CancellationToken cancellationToken)
+        {
+            customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
+
+            logger.LogInformation("Customer search returned {CustomerCount} customers. Fuzzy search: {UseFuzzySearch}",
+                customers.Count, ViewModel.UseFuzzySearch);
+
+            uiDispatcher.TryEnqueue(() =>
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                UpdateCustomersCollection(customers);
+            });
+        }
+
+        private void UpdateCustomersCollection(List<GetCustomerDto> customers)
+        {
+            logger.LogDebug("Updating Customers collection. Existing count: {ExistingCount}",
+                ViewModel.Customers.Count);
+
+            ViewModel.Customers.ReplaceItems(customers);
+            ViewModel.DataGrid.Refresh();
+
+            RestoreSelectedCustomer();
+
+            logger.LogDebug(
+                "Customers collection updated. New count: {NewCount}, SelectedCustomerId: {SelectedCustomerId}, SelectedCustomer: '{SelectedCustomerName}'",
+                ViewModel.Customers.Count, ViewModel.SelectedCustomerId, ViewModel.SelectedCustomer?.Name);
         }
 
         private void RememberSelectedCustomer()

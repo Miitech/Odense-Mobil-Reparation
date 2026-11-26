@@ -1,3 +1,4 @@
+using Repair.Frontend.Settings;
 using Repair.Models.Api;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Dispatching;
@@ -22,6 +23,7 @@ internal sealed partial class OrdersGrid : Border, INavigationRefreshable
         var ui = new OrdersGridUi(Logic, ViewModel);
 
         Child = ui.CreateContentGrid();
+        Unloaded += (_, _) => Logic.CancelPendingRefresh();
 
         _ = Logic.RefreshOrders();
     }
@@ -32,7 +34,8 @@ internal sealed partial class OrdersGrid : Border, INavigationRefreshable
         IOrderApi OrderApi,
         IUiDispatcher UiDispatcher,
         ILoggerFactory LoggerFactory,
-        int CustomerId = 0)
+        int CustomerId = 0,
+        int DebounceDelayMilliseconds = SearchSettings.DEFAULT_DEBOUNCE_DELAY_MILLISECONDS)
     {
     }
 

@@ -1,3 +1,4 @@
+using Repair.Frontend.Settings;
 using Microsoft.Extensions.Configuration;
 #if __WASM__
 using System.Runtime.InteropServices.JavaScript;
@@ -40,6 +41,22 @@ public partial class ConfigurationService
         }
 
         return uri;
+    }
+
+    public SearchSettings GetSearchSettings(IConfiguration configuration)
+    {
+        string? value = configuration["Search:DebounceDelayMilliseconds"];
+        if (value is null)
+        {
+            return new SearchSettings();
+        }
+
+        if (!int.TryParse(value, out int delay) || delay < 0)
+        {
+            throw new InvalidOperationException("Invalid configuration: Search:DebounceDelayMilliseconds.");
+        }
+
+        return new SearchSettings { DebounceDelayMilliseconds = delay };
     }
 
 #if __WASM__

@@ -1,3 +1,4 @@
+using Repair.Frontend.Settings;
 using System.Text.Json;
 using Microsoft.UI.Dispatching;
 using Repair.Abstractions.Api;
@@ -14,8 +15,12 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
 {
     public IHost? Host { get; private set; }
 
-    public UnoStartup(Uri apiBaseAddress)
+    private readonly SearchSettings searchSettings;
+
+    public UnoStartup(Uri apiBaseAddress, SearchSettings searchSettings)
     {
+        this.searchSettings = searchSettings;
+
         AddModule(new LoggingStartupModule(new[]
         {
             LogTarget.BROWSER_CONSOLE,
@@ -59,6 +64,7 @@ internal class UnoStartup : ModularStartup<IApplicationBuilder>
         DispatcherQueue uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         services.AddSingleton(uiDispatcherQueue);
         services.AddSingleton<IUiDispatcher, UiDispatcher>();
+        services.AddSingleton(searchSettings);
         services.AddSingleton<ArgumentsFactory>();
         services.AddSingleton<TrialService>();
 

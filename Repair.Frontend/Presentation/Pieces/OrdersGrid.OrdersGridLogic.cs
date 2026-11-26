@@ -1,3 +1,4 @@
+using Repair.Frontend.Services;
 using Repair.Models.Dto.Get;
 using Repair.Models.Api;
 using Microsoft.UI.Dispatching;
@@ -16,6 +17,7 @@ internal sealed partial class OrdersGrid
     internal sealed partial class OrdersGridLogic : BaseLogic<OrdersGridViewModel>
     {
         private readonly IOrderApi orderApi;
+        private readonly Debouncer debouncer;
         private readonly IUiDispatcher uiDispatcher;
         private readonly ILogger<OrdersGridLogic> logger;
 
@@ -25,7 +27,9 @@ internal sealed partial class OrdersGrid
             uiDispatcher = ViewModel.Arguments.UiDispatcher;
             logger = ViewModel.Arguments.LoggerFactory.CreateLogger<OrdersGridLogic>();
 
+            debouncer = new Debouncer(ViewModel.Arguments.DebounceDelayMilliseconds);
             ViewModel.SearchChanged += SearchChanged;
+            ViewModel.SearchTextChanged += SearchTextChanged;
         }
 
         internal async void SearchChanged(object? sender, EventArgs e)
@@ -33,33 +37,62 @@ internal sealed partial class OrdersGrid
             await RefreshOrders();
         }
 
-        public async Task RefreshOrders()
+        private async void SearchTextChanged(object? sender, EventArgs e)
+        {
+            await debouncer.Run(SearchOrders, delayed: true);
+        }
+
+        public void CancelPendingRefresh() => debouncer.Cancel();
+
+        public Task RefreshOrders() => debouncer.Run(SearchOrders, delayed: false);
+
+        private async Task SearchOrders(CancellationToken cancellationToken)
         {
             try
             {
                 ComplexSearchableOrder searchable = CreateSearchableOrder();
 
                 List<GetOrderDto> orders = (await orderApi.SearchComplex(searchable)).ToList();
-                orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
-
-                logger.LogInformation(
-                    "Order search returned {OrderCount} orders. CustomerId filter: {CustomerId}, Fuzzy search: {UseFuzzySearch}",
-                    orders.Count, ViewModel.CustomerId, ViewModel.UseFuzzySearch);
-
-                uiDispatcher.TryEnqueue(() =>
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    logger.LogDebug("Updating Orders collection. Existing count: {ExistingCount}", ViewModel.Orders.Count);
+                    return;
+                }
 
-                    ViewModel.Orders.ReplaceItems(orders);
-                    ViewModel.DataGrid.Refresh();
-
-                    logger.LogDebug("Orders collection updated. New count: {NewCount}", ViewModel.Orders.Count);
-                });
+                ApplySearchResults(orders, cancellationToken);
             }
             catch (Exception exe)
             {
                 logger.LogError(exe, "Exception caught during refresh of Orders");
             }
+        }
+
+        private void ApplySearchResults(List<GetOrderDto> orders, CancellationToken cancellationToken)
+        {
+            orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
+
+            logger.LogInformation(
+                "Order search returned {OrderCount} orders. CustomerId filter: {CustomerId}, Fuzzy search: {UseFuzzySearch}",
+                orders.Count, ViewModel.CustomerId, ViewModel.UseFuzzySearch);
+
+            uiDispatcher.TryEnqueue(() =>
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                UpdateOrdersCollection(orders);
+            });
+        }
+
+        private void UpdateOrdersCollection(List<GetOrderDto> orders)
+        {
+            logger.LogDebug("Updating Orders collection. Existing count: {ExistingCount}", ViewModel.Orders.Count);
+
+            ViewModel.Orders.ReplaceItems(orders);
+            ViewModel.DataGrid.Refresh();
+
+            logger.LogDebug("Orders collection updated. New count: {NewCount}", ViewModel.Orders.Count);
         }
 
         private ComplexSearchableOrder CreateSearchableOrder()
