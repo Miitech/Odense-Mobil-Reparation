@@ -27,8 +27,11 @@ public abstract class EntityConfiguration<TEntity> : IEntityTypeConfiguration<TE
         switch (this.type)
         {
             case DatabaseType.SQL_LITE:
-                builder.Property(x => x.Version).IsRowVersion().HasConversion(new SqliteTimestampConverter())
-                    .HasColumnType("BLOB").HasDefaultValueSql("CURRENT_TIMESTAMP");
+                builder.Property(x => x.Version).IsRowVersion()
+                    .HasColumnType("BLOB").HasDefaultValueSql("randomblob(16)");
+
+                // SQLite RETURNING does not include changes made by AFTER triggers.
+                builder.ToTable(table => table.UseSqlReturningClause(false));
 
                 break;
             case DatabaseType.POSTGRESQL:
