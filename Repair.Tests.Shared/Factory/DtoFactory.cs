@@ -1,4 +1,5 @@
 using Repair.Models.Dto.Add;
+using Repair.Models.Dto.Get;
 using Repair.Models.Dto.Update;
 
 namespace Repair.Tests.Shared.Factory;
@@ -44,5 +45,15 @@ internal static class DtoFactory
             IsOrderComplete = isOrderComplete,
             Version = version,
         };
+    }
+
+    public static GetCustomerDto CreateGetCustomer(int id, byte version, string name = "Customer")
+    {
+        return new GetCustomerDto { Id = id, Version = [version], Name = name, };
+    }
+
+    public static GetOrderDto CreateGetOrder(int id, byte version, GetCustomerDto customer)
+    {
+        return new GetOrderDto { Id = id, Version = [version], CustomerId = customer.Id, Customer = customer, };
     }
 }
