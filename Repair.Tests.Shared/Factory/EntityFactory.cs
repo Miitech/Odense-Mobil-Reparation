@@ -45,7 +45,7 @@ internal static class EntityFactory
         order.HandInWhen = new DateTime(2026, 06, 18, 10, 30, 00);
         order.ReturnedWhen = new DateTime(2026, 06, 19, 11, 45, 00);
         order.IsOrderComplete = true;
-        order.BorrowedPhone = "Samsung A52";
+        order.BorrowedDevice = "Samsung A52";
 
         return order;
     }

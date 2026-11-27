@@ -25,7 +25,7 @@ internal sealed partial class OrderEditor
             grid.Children.Add(CreateHandInWhatTextBox().SetRow(0).SetColumn(0));
             grid.Children.Add(CreateHandInWhenPicker().SetRow(0).SetColumn(1));
             grid.Children.Add(CreateReturnedWhenPicker().SetRow(0).SetColumn(2));
-            grid.Children.Add(CreateBorrowedPhoneTextBox().SetRow(1).SetColumn(0));
+            grid.Children.Add(CreateBorrowedDeviceTextBox().SetRow(1).SetColumn(0));
             grid.Children.Add(CreateIsOrderCompleteCheckBox().SetRow(2).SetColumn(0));
 
             grid.Children.Add(CreateRepairWhatTextBox().SetRow(1, 2).SetColumn(1, 2));
@@ -82,12 +82,12 @@ internal sealed partial class OrderEditor
             return grid;
         }
 
-        private TextBox CreateBorrowedPhoneTextBox()
+        private TextBox CreateBorrowedDeviceTextBox()
         {
-            ViewModel.BorrowedPhoneTextBox = TextBoxFactory.CreateSearchBox("Borrowed device?", "Borrowed device...",
-                nameof(OrderEditorViewModel.BorrowedPhone));
+            ViewModel.BorrowedDeviceTextBox = TextBoxFactory.CreateSearchBox("Borrowed device?", "Borrowed device...",
+                nameof(OrderEditorViewModel.BorrowedDevice));
 
-            return ViewModel.BorrowedPhoneTextBox;
+            return ViewModel.BorrowedDeviceTextBox;
         }
 
         private TextBox CreateHandInWhatTextBox()

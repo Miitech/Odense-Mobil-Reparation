@@ -87,7 +87,7 @@ public class OrderController : EntityController<Order, SearchableOrder, ComplexS
             HandInWhat = dto.HandInWhat,
             RepairWhat = dto.RepairWhat,
             CustomerId = dto.CustomerId,
-            BorrowedPhone = dto.BorrowedPhone,
+            BorrowedDevice = dto.BorrowedDevice,
             HandInWhen = dto.HandInWhen,
             ReturnedWhen = dto.ReturnedWhen,
             IsOrderComplete = dto.IsOrderComplete,
@@ -100,7 +100,7 @@ public class OrderController : EntityController<Order, SearchableOrder, ComplexS
         entity.HandInWhat = dto.HandInWhat;
         entity.RepairWhat = dto.RepairWhat;
         entity.CustomerId = dto.CustomerId;
-        entity.BorrowedPhone = dto.BorrowedPhone;
+        entity.BorrowedDevice = dto.BorrowedDevice;
         entity.HandInWhen = dto.HandInWhen;
         entity.ReturnedWhen = dto.ReturnedWhen;
         entity.IsOrderComplete = dto.IsOrderComplete;
@@ -118,7 +118,7 @@ public class OrderController : EntityController<Order, SearchableOrder, ComplexS
             HandInWhat = entity.HandInWhat,
             RepairWhat = entity.RepairWhat,
             CustomerId = entity.CustomerId,
-            BorrowedPhone = entity.BorrowedPhone,
+            BorrowedDevice = entity.BorrowedDevice,
             HandInWhen = entity.HandInWhen,
             ReturnedWhen = entity.ReturnedWhen,
             IsOrderComplete = entity.IsOrderComplete,

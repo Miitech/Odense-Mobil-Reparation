@@ -70,11 +70,11 @@ public class OrderQueryService : BaseEntityQueryService<RepairDatabaseContext, O
             query = query.Where(x => EF.Functions.Like(x.RepairWhat, keyword));
         }
 
-        if (!string.IsNullOrWhiteSpace(orderComplex.BorrowedPhone))
+        if (!string.IsNullOrWhiteSpace(orderComplex.BorrowedDevice))
         {
-            var keyword = $"%{orderComplex.BorrowedPhone}%";
+            var keyword = $"%{orderComplex.BorrowedDevice}%";
 
-            query = query.Where(x => x.BorrowedPhone != null && EF.Functions.Like(x.BorrowedPhone, keyword));
+            query = query.Where(x => x.BorrowedDevice != null && EF.Functions.Like(x.BorrowedDevice, keyword));
         }
 
         if (!string.IsNullOrWhiteSpace(orderComplex.CustomerName))
@@ -128,9 +128,11 @@ public class OrderQueryService : BaseEntityQueryService<RepairDatabaseContext, O
         if (!string.IsNullOrWhiteSpace(searchable.RepairWhat))
             query = query.Where(x => x.RepairWhat.ToLower() == searchable.RepairWhat.ToLower());
 
-        if (!string.IsNullOrWhiteSpace(searchable.BorrowedPhone))
+        if (!string.IsNullOrWhiteSpace(searchable.BorrowedDevice))
+        {
             query = query.Where(x =>
-                x.BorrowedPhone != null && x.BorrowedPhone.ToLower() == searchable.BorrowedPhone.ToLower());
+                x.BorrowedDevice != null && x.BorrowedDevice.ToLower() == searchable.BorrowedDevice.ToLower());
+        }
 
         if (searchable.CustomerId != 0)
             query = query.Where(x => x.CustomerId == searchable.CustomerId);

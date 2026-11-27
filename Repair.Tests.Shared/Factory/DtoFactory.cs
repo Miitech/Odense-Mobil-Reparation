@@ -16,30 +16,32 @@ internal static class DtoFactory
         return new UpdateCustomerDto { Name = name, Phone = phone, Email = email, Version = version, };
     }
 
-    public static AddOrderDto CreateAddOrder(string handInWhat, string repairWhat, int customerId,
-        string? borrowedPhone, DateTime handInWhen, DateTime? returnedWhen, bool isOrderComplete)
+    public static AddOrderDto CreateAddOrder(
+        string handInWhat, string repairWhat, int customerId, string? borrowedDevice, DateTime handInWhen,
+        DateTime? returnedWhen, bool isOrderComplete)
     {
         return new AddOrderDto
         {
             HandInWhat = handInWhat,
             RepairWhat = repairWhat,
             CustomerId = customerId,
-            BorrowedPhone = borrowedPhone,
+            BorrowedDevice = borrowedDevice,
             HandInWhen = handInWhen,
             ReturnedWhen = returnedWhen,
             IsOrderComplete = isOrderComplete,
         };
     }
 
-    public static UpdateOrderDto CreateUpdateOrder(string handInWhat, string repairWhat, int customerId,
-        string? borrowedPhone, DateTime handInWhen, DateTime? returnedWhen, bool isOrderComplete, byte[] version)
+    public static UpdateOrderDto CreateUpdateOrder(
+        string handInWhat, string repairWhat, int customerId, string? borrowedDevice, DateTime handInWhen,
+        DateTime? returnedWhen, bool isOrderComplete, byte[] version)
     {
         return new UpdateOrderDto
         {
             HandInWhat = handInWhat,
             RepairWhat = repairWhat,
             CustomerId = customerId,
-            BorrowedPhone = borrowedPhone,
+            BorrowedDevice = borrowedDevice,
             HandInWhen = handInWhen,
             ReturnedWhen = returnedWhen,
             IsOrderComplete = isOrderComplete,

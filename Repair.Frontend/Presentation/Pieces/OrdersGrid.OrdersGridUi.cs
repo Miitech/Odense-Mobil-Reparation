@@ -64,13 +64,13 @@ internal sealed partial class OrdersGrid
         {
             TextBox handInWhatSearchBox = CreateHandInWhatSearchBox().SetRow(2).SetColumn(0);
             TextBox repairWhatSearchBox = CreateRepairWhatSearchBox().SetRow(3).SetColumn(0);
-            TextBox borrowedPhoneSearchBox = CreateBorrowedPhoneSearchBox().SetRow(3).SetColumn(1);
+            TextBox borrowedDeviceSearchBox = CreateBorrowedDeviceSearchBox().SetRow(3).SetColumn(1);
             TextBox customerNameSearchBox = CreateCustomerNameSearchBox().SetRow(2).SetColumn(1);
             Grid fuzzyToggle = CreateFuzzySearchGrid().SetRow(4).SetColumn(0);
 
             grid.Children.Add(handInWhatSearchBox);
             grid.Children.Add(repairWhatSearchBox);
-            grid.Children.Add(borrowedPhoneSearchBox);
+            grid.Children.Add(borrowedDeviceSearchBox);
             grid.Children.Add(customerNameSearchBox);
 
             grid.Children.Add(fuzzyToggle);
@@ -156,12 +156,12 @@ internal sealed partial class OrdersGrid
             return ViewModel.IsOrderCompleteOptionBar;
         }
 
-        private TextBox CreateBorrowedPhoneSearchBox()
+        private TextBox CreateBorrowedDeviceSearchBox()
         {
-            ViewModel.BorrowedPhoneSearchBox = TextBoxFactory.CreateSearchBox("Borrowed device",
-                "Search borrowed device...", nameof(OrdersGridViewModel.BorrowedPhoneSearchText));
+            ViewModel.BorrowedDeviceSearchBox = TextBoxFactory.CreateSearchBox("Borrowed device",
+                "Search borrowed device...", nameof(OrdersGridViewModel.BorrowedDeviceSearchText));
 
-            return ViewModel.BorrowedPhoneSearchBox;
+            return ViewModel.BorrowedDeviceSearchBox;
         }
 
         private TextBox CreateHandInWhatSearchBox()
@@ -208,7 +208,7 @@ internal sealed partial class OrdersGrid
                 OrderGridColumns.HANDED_IN_WHEN => nameof(GetOrderDto.HandInWhen),
                 OrderGridColumns.RETURNED_WHEN => nameof(GetOrderDto.ReturnedWhen),
                 OrderGridColumns.IS_ORDER_COMPLETE => nameof(GetOrderDto.IsOrderComplete),
-                OrderGridColumns.BORROWED_DEVICE => nameof(GetOrderDto.BorrowedPhone),
+                OrderGridColumns.BORROWED_DEVICE => nameof(GetOrderDto.BorrowedDevice),
                 OrderGridColumns.CUSTOMER_NAME => $"{nameof(GetOrderDto.Customer)}.{nameof(GetCustomerDto.Name)}",
                 var _ => throw new ArgumentOutOfRangeException(nameof(column), column, null),
             };

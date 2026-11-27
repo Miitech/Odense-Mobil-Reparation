@@ -8,5 +8,5 @@ public interface ISearchableOrderData
 
     int CustomerId { get; set; }
 
-    string? BorrowedPhone { get; set; }
+    string? BorrowedDevice { get; set; }
 }

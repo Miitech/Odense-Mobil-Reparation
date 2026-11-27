@@ -17,5 +17,5 @@ public class SearchableOrder : ISearchableOrder
     public int CustomerId { get; set; }
 
     /// <inheritdoc />
-    public string? BorrowedPhone { get; set; }
+    public string? BorrowedDevice { get; set; }
 }

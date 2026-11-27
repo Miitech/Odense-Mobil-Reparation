@@ -30,8 +30,8 @@ public class ReportService(
     private const string ORDER_DETAILS_HEADER = "Ordreoplysninger";
     private const string HANDED_IN_LABEL = "Indleveret";
     private const string RETURNED_LABEL = "Udleveret";
-    private const string BORROWED_PHONE_HEADER = "Låneenhed";
-    private const string NO_BORROWED_PHONE = "Ingen låneenhed";
+    private const string BORROWED_DEVICE_HEADER = "Låneenhed";
+    private const string NO_BORROWED_DEVICE = "Ingen låneenhed";
     private const string HAND_IN_WHAT_HEADER = "Indleveret";
     private const string REPAIR_NOTES_HEADER = "Reparationsnoter";
     private const string NO_DATE_TIME_SET = "Ingen dato/tid angivet";
@@ -245,8 +245,8 @@ public class ReportService(
             orderColumn.Item().Text($"{RETURNED_LABEL}: {FormatNullableDateTime(order.ReturnedWhen)}");
             orderColumn.Item().Text($"{IS_ORDER_COMPLETE_LABEL}: {FormatBoolean(order.IsOrderComplete)}");
 
-            orderColumn.Item().PaddingTop(10).Text(BORROWED_PHONE_HEADER).Bold();
-            orderColumn.Item().Text(GetTextValue(order.BorrowedPhone, NO_BORROWED_PHONE));
+            orderColumn.Item().PaddingTop(10).Text(BORROWED_DEVICE_HEADER).Bold();
+            orderColumn.Item().Text(GetTextValue(order.BorrowedDevice, NO_BORROWED_DEVICE));
 
             orderColumn.Item().PaddingTop(10).Text(HAND_IN_WHAT_HEADER).Bold();
             orderColumn.Item().Text(order.HandInWhat);

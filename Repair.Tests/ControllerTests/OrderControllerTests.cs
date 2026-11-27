@@ -58,7 +58,7 @@ public class OrderControllerTests
             order.UpdatedDateTime = order.CreatedDateTime.AddHours(1);
             order.HandInWhen = order.CreatedDateTime;
             order.ReturnedWhen = order.HandInWhen.AddDays(1);
-            order.BorrowedPhone = "Samsung A52";
+            order.BorrowedDevice = "Samsung A52";
             order.IsOrderComplete = true;
             return order;
         }
@@ -82,7 +82,7 @@ public class OrderControllerTests
             dto.HandInWhat.Should().Be(order.HandInWhat);
             dto.RepairWhat.Should().Be(order.RepairWhat);
             dto.CustomerId.Should().Be(order.CustomerId);
-            dto.BorrowedPhone.Should().Be(order.BorrowedPhone);
+            dto.BorrowedDevice.Should().Be(order.BorrowedDevice);
             dto.HandInWhen.Should().Be(order.HandInWhen);
             dto.ReturnedWhen.Should().Be(order.ReturnedWhen);
             dto.IsOrderComplete.Should().Be(order.IsOrderComplete);
@@ -113,7 +113,7 @@ public class OrderControllerTests
             order.HandInWhat.Should().Be(dto.HandInWhat);
             order.RepairWhat.Should().Be(dto.RepairWhat);
             order.CustomerId.Should().Be(dto.CustomerId);
-            order.BorrowedPhone.Should().Be(dto.BorrowedPhone);
+            order.BorrowedDevice.Should().Be(dto.BorrowedDevice);
             order.HandInWhen.Should().Be(dto.HandInWhen);
             order.ReturnedWhen.Should().Be(dto.ReturnedWhen);
             order.IsOrderComplete.Should().Be(dto.IsOrderComplete);

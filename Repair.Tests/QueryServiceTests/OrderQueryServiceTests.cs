@@ -128,23 +128,23 @@ public class OrderQueryServiceTests
         }
 
         [Test]
-        public async Task WithBorrowedPhone_ReturnsMatchesAndIgnoresCasing()
+        public async Task WithBorrowedDevice_ReturnsMatchesAndIgnoresCasing()
         {
             await using RepairDatabaseContext context = CreateContext();
             Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
             Order expected = EntityFactory.CreateOrder("Phone", "Screen", customer);
             Order other = EntityFactory.CreateOrder("Tablet", "Battery", customer);
-            Order noBorrowedPhone = EntityFactory.CreateOrder("Laptop", "Keyboard", customer);
+            Order noBorrowedDevice = EntityFactory.CreateOrder("Laptop", "Keyboard", customer);
 
-            expected.BorrowedPhone = "iPhone 8";
-            other.BorrowedPhone = "Samsung A52";
-            noBorrowedPhone.BorrowedPhone = null;
+            expected.BorrowedDevice = "iPhone 8";
+            other.BorrowedDevice = "Samsung A52";
+            noBorrowedDevice.BorrowedDevice = null;
 
-            context.Orders.AddRange(expected, other, noBorrowedPhone);
+            context.Orders.AddRange(expected, other, noBorrowedDevice);
             await context.SaveChangesAsync();
 
             var service = new OrderQueryService(context);
-            ComplexSearchableOrder complex = new() {BorrowedPhone = "iphone",};
+            ComplexSearchableOrder complex = new() {BorrowedDevice = "iphone",};
 
             var result = (await service.GetEntitiesComplex(complex)).ToList();
 
@@ -231,9 +231,9 @@ public class OrderQueryServiceTests
             wrongComplete.IsOrderComplete = false;
             wrongComplete.HandInWhen = new DateTime(2026, 05, 10);
 
-            expected.BorrowedPhone = "iPhone 8";
-            wrongRepair.BorrowedPhone = "iPhone 8";
-            wrongComplete.BorrowedPhone = "Samsung A52";
+            expected.BorrowedDevice = "iPhone 8";
+            wrongRepair.BorrowedDevice = "iPhone 8";
+            wrongComplete.BorrowedDevice = "Samsung A52";
 
             context.Orders.AddRange(expected, wrongRepair, wrongComplete);
             await context.SaveChangesAsync();
@@ -243,7 +243,7 @@ public class OrderQueryServiceTests
             {
                 HandInWhat = "iphone",
                 RepairWhat = "SCREEN",
-                BorrowedPhone = "iphone",
+                BorrowedDevice = "iphone",
                 IsOrderComplete = true,
                 HandInFrom = new DateTime(2026, 05, 05),
                 HandInTo = new DateTime(2026, 05, 15),
@@ -259,25 +259,25 @@ public class OrderQueryServiceTests
     public class GetEntity : BaseDatabaseTest
     {
         [Test]
-        public async Task WithMatchingBorrowedPhone_ReturnsOrder()
+        public async Task WithMatchingBorrowedDevice_ReturnsOrder()
         {
             await using RepairDatabaseContext context = CreateContext();
             Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
             Order expected = EntityFactory.CreateOrder("Phone", "Screen", customer);
 
-            expected.BorrowedPhone = "iPhone 8";
+            expected.BorrowedDevice = "iPhone 8";
 
             context.Orders.Add(expected);
             await context.SaveChangesAsync();
 
             var service = new OrderQueryService(context);
-            SearchableOrder searchable = new() {BorrowedPhone = "IPHONE 8",};
+            SearchableOrder searchable = new() {BorrowedDevice = "IPHONE 8",};
 
             Order? result = await service.GetEntity(searchable);
 
             result.Should().NotBeNull();
             result.Id.Should().Be(expected.Id);
-            result.BorrowedPhone.Should().Be("iPhone 8");
+            result.BorrowedDevice.Should().Be("iPhone 8");
         }
 
         [Test]

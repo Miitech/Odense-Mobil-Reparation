@@ -86,7 +86,7 @@ public class BogusService
                 x => x.Random.Bool(0.3f) ? x.PickRandom(longRepairTypes) : x.PickRandom(shortRepairTypes))
             .RuleFor(x => x.HandInWhen, x => x.Date.Between(DateTime.Today.AddMonths(-6), DateTime.Today))
             .RuleFor(x => x.IsOrderComplete, x => x.Random.Bool(0.60f))
-            .RuleFor(x => x.BorrowedPhone, x => x.Random.Bool(0.15f) ? x.PickRandom(handInItems) : null)
+            .RuleFor(x => x.BorrowedDevice, x => x.Random.Bool(0.15f) ? x.PickRandom(handInItems) : null)
             .RuleFor(x => x.ReturnedWhen, GetReturnedWhen).RuleFor(x => x.Customer, customer);
     }
 

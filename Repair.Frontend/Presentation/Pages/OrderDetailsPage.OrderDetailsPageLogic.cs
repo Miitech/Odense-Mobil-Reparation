@@ -49,7 +49,7 @@ internal sealed partial class OrderDetailsPage
             ViewModel.OrderEditor.ViewModel.HandInWhatChanged += OrderEditorChanged;
             ViewModel.OrderEditor.ViewModel.RepairWhatChanged += OrderEditorChanged;
             ViewModel.OrderEditor.ViewModel.IsOrderCompleteChanged += OrderEditorChanged;
-            ViewModel.OrderEditor.ViewModel.BorrowedPhoneChanged += OrderEditorChanged;
+            ViewModel.OrderEditor.ViewModel.BorrowedDeviceChanged += OrderEditorChanged;
             ViewModel.OrderEditor.ViewModel.CustomersGrid.ViewModel.CustomerSelectionChanged += OrderEditorChanged;
         }
 
@@ -107,8 +107,8 @@ internal sealed partial class OrderDetailsPage
             logger.LogDebug("IsOrderComplete: '{OldValue}' -> '{NewValue}'", ViewModel.Order.IsOrderComplete,
                 ViewModel.OrderEditor.ViewModel.IsOrderComplete);
 
-            logger.LogDebug("BorrowedPhone: '{OldValue}' -> '{NewValue}'", ViewModel.Order.BorrowedPhone,
-                ViewModel.OrderEditor.ViewModel.BorrowedPhone);
+            logger.LogDebug("BorrowedDevice: '{OldValue}' -> '{NewValue}'", ViewModel.Order.BorrowedDevice,
+                ViewModel.OrderEditor.ViewModel.BorrowedDevice);
 
             logger.LogDebug("CustomerId: '{OldValue}' -> '{NewValue}'", ViewModel.Order.CustomerId,
                 ViewModel.OrderEditor.ViewModel.CustomerId);
@@ -121,7 +121,7 @@ internal sealed partial class OrderDetailsPage
                 HandInWhat = ViewModel.OrderEditor.ViewModel.HandInWhat,
                 RepairWhat = ViewModel.OrderEditor.ViewModel.RepairWhat,
                 IsOrderComplete = ViewModel.OrderEditor.ViewModel.IsOrderComplete,
-                BorrowedPhone = ViewModel.OrderEditor.ViewModel.BorrowedPhone,
+                BorrowedDevice = ViewModel.OrderEditor.ViewModel.BorrowedDevice,
                 CustomerId = ViewModel.OrderEditor.ViewModel.CustomerId,
             };
         }
@@ -135,7 +135,7 @@ internal sealed partial class OrderDetailsPage
             ViewModel.OrderEditor.ViewModel.HandInWhat = ViewModel.Order.HandInWhat;
             ViewModel.OrderEditor.ViewModel.RepairWhat = ViewModel.Order.RepairWhat;
             ViewModel.OrderEditor.ViewModel.IsOrderComplete = ViewModel.Order.IsOrderComplete;
-            ViewModel.OrderEditor.ViewModel.BorrowedPhone = ViewModel.Order.BorrowedPhone ?? string.Empty;
+            ViewModel.OrderEditor.ViewModel.BorrowedDevice = ViewModel.Order.BorrowedDevice ?? string.Empty;
             ViewModel.OrderEditor.ViewModel.CustomersGrid.ViewModel.SelectedCustomerId = ViewModel.Order.CustomerId;
         }
 
@@ -187,8 +187,8 @@ internal sealed partial class OrderDetailsPage
                                    ViewModel.OrderEditor.ViewModel.HandInWhat != ViewModel.Order.HandInWhat ||
                                    ViewModel.OrderEditor.ViewModel.RepairWhat != ViewModel.Order.RepairWhat ||
                                    ViewModel.OrderEditor.ViewModel.IsOrderComplete != ViewModel.Order.IsOrderComplete ||
-                                   ViewModel.OrderEditor.ViewModel.BorrowedPhone !=
-                                   (ViewModel.Order.BorrowedPhone ?? string.Empty) ||
+                                   ViewModel.OrderEditor.ViewModel.BorrowedDevice !=
+                                   (ViewModel.Order.BorrowedDevice ?? string.Empty) ||
                                    ViewModel.OrderEditor.ViewModel.CustomerId != ViewModel.Order.CustomerId;
 
             UpdateSaveAndCancelText();

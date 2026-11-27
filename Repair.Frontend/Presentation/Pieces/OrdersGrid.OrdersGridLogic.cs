@@ -112,13 +112,13 @@ internal sealed partial class OrdersGrid
             {
                 complex.HandInWhat = ViewModel.HandInWhatSearchText;
                 complex.RepairWhat = ViewModel.RepairWhatSearchText;
-                complex.BorrowedPhone = ViewModel.BorrowedPhoneSearchText;
+                complex.BorrowedDevice = ViewModel.BorrowedDeviceSearchText;
             }
             else
             {
                 complex.Searchable.HandInWhat = ViewModel.HandInWhatSearchText;
                 complex.Searchable.RepairWhat = ViewModel.RepairWhatSearchText;
-                complex.Searchable.BorrowedPhone = ViewModel.BorrowedPhoneSearchText;
+                complex.Searchable.BorrowedDevice = ViewModel.BorrowedDeviceSearchText;
             }
 
             AddDateTimeFilters(complex);

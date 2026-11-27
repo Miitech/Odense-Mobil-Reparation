@@ -10,12 +10,12 @@ internal sealed partial class OrderEditor
         public event EventHandler? HandInWhatChanged;
         public event EventHandler? RepairWhatChanged;
         public event EventHandler? IsOrderCompleteChanged;
-        public event EventHandler? BorrowedPhoneChanged;
+        public event EventHandler? BorrowedDeviceChanged;
 
         internal DateTimePicker HandInWhenPicker { get; set; } = null!;
         internal DateTimePicker ReturnedWhenPicker { get; set; } = null!;
         internal CheckBox IsOrderCompleteCheckBox { get; set; } = null!;
-        internal TextBox BorrowedPhoneTextBox { get; set; } = null!;
+        internal TextBox BorrowedDeviceTextBox { get; set; } = null!;
         internal TextBox HandInWhatTextBox { get; set; } = null!;
         internal TextBox RepairWhatTextBox { get; set; } = null!;
         internal CustomersGrid CustomersGrid { get; set; } = null!;
@@ -24,7 +24,7 @@ internal sealed partial class OrderEditor
         [ObservableProperty] private string selectedCustomerText = "Current Selected Customer: Missing Selection";
         [ObservableProperty] private string handInWhat = arguments.Order?.HandInWhat ?? string.Empty;
         [ObservableProperty] private string repairWhat = arguments.Order?.RepairWhat ?? string.Empty;
-        [ObservableProperty] private string borrowedPhone = arguments.Order?.BorrowedPhone ?? string.Empty;
+        [ObservableProperty] private string borrowedDevice = arguments.Order?.BorrowedDevice ?? string.Empty;
         [ObservableProperty] private bool isOrderComplete = arguments.Order?.IsOrderComplete ?? false;
         [ObservableProperty] private bool isReadOnly = true;
 
@@ -52,9 +52,9 @@ internal sealed partial class OrderEditor
             IsOrderCompleteChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        partial void OnBorrowedPhoneChanged(string value)
+        partial void OnBorrowedDeviceChanged(string value)
         {
-            BorrowedPhoneChanged?.Invoke(this, EventArgs.Empty);
+            BorrowedDeviceChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

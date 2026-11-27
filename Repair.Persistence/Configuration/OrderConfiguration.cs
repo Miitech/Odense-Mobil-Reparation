@@ -21,6 +21,6 @@ public class OrderConfiguration : EntityConfiguration<Order>
         builder.Property(x => x.HandInWhen).IsRequired();
         builder.Property(x => x.ReturnedWhen);
         builder.Property(x => x.IsOrderComplete).IsRequired();
-        builder.Property(x => x.BorrowedPhone).IsRequired(false);
+        builder.Property(x => x.BorrowedDevice).IsRequired(false);
     }
 }
