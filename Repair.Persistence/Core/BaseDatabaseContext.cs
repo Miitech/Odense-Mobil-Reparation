@@ -54,7 +54,7 @@ public abstract class BaseDatabaseContext<TContext> : DbContext where TContext :
 
     private void UpdateVersion(EntityEntry<IEntity> entry)
     {
-        var version = entry.Property(x => x.Version);
+        var version = entry.Property<byte[]>(nameof(IEntity.Version));
         version.CurrentValue = Guid.NewGuid().ToByteArray();
 
         if (entry.State == EntityState.Modified)
