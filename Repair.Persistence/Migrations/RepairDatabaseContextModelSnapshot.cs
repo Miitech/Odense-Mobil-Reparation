@@ -15,7 +15,7 @@ namespace Repair.Persistence.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
             modelBuilder.Entity("Repair.Models.Entity.Model.Customer", b =>
                 {
@@ -42,12 +42,10 @@ namespace Repair.Persistence.Migrations
                     b.Property<DateTime>("UpdatedDateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Version")
+                    b.Property<byte[]>("Version")
                         .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 
@@ -67,7 +65,7 @@ namespace Repair.Persistence.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("OrderId");
 
-                    b.Property<string>("BorrowedPhone")
+                    b.Property<string>("BorrowedDevice")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDateTime")
@@ -96,12 +94,10 @@ namespace Repair.Persistence.Migrations
                     b.Property<DateTime>("UpdatedDateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Version")
+                    b.Property<byte[]>("Version")
                         .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 
