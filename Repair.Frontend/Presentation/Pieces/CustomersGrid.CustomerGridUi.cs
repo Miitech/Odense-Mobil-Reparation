@@ -35,14 +35,10 @@ internal sealed partial class CustomersGrid
         private DataGrid CreateCustomerDataGrid()
         {
             ViewModel.DataGrid =
-                DataGridFactory.Create<CustomerGridColumns>(ViewModel.Customers, GetColumnBindingPath,
+                DataGridFactory.Create<CustomerGridColumns, GetCustomerDto>(ViewModel.Customers, GetColumnBindingPath,
                     GetColumnConverter);
 
-            ViewModel.DataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding
-            {
-                Path = new PropertyPath(nameof(CustomersGridViewModel.SelectedCustomer)),
-                Mode = BindingMode.TwoWay,
-            });
+            ViewModel.DataGrid.SelectionChanged += Logic.CustomerSelectionChanged;
 
             ViewModel.DataGrid.Margin = new Thickness(4);
 

@@ -68,8 +68,6 @@ internal sealed partial class OrdersGrid
 
         private void ApplySearchResults(List<GetOrderDto> orders, CancellationToken cancellationToken)
         {
-            orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
-
             logger.LogInformation(
                 "Order search returned {OrderCount} orders. CustomerId filter: {CustomerId}, Fuzzy search: {UseFuzzySearch}",
                 orders.Count, ViewModel.CustomerId, ViewModel.UseFuzzySearch);
@@ -89,10 +87,22 @@ internal sealed partial class OrdersGrid
         {
             logger.LogDebug("Updating Orders collection. Existing count: {ExistingCount}", ViewModel.Orders.Count);
 
-            ViewModel.Orders.ReplaceItems(orders);
-            ViewModel.DataGrid.Refresh();
+            int? selectedId = (ViewModel.DataGrid.SelectedItem as GetOrderDto)?.Id;
+            orders = ViewModel.DataGrid.ApplyCurrentSort(orders).ToList();
+            ViewModel.DataGrid.UpdateSelectionSafely(() =>
+            {
+                ViewModel.Orders.SynchronizeItems(orders, HaveSameCustomerVersion);
+                ViewModel.DataGrid.SelectedItem = selectedId.HasValue
+                    ? ViewModel.Orders.FirstOrDefault(x => x.Id == selectedId.Value)
+                    : null;
+            });
 
             logger.LogDebug("Orders collection updated. New count: {NewCount}", ViewModel.Orders.Count);
+        }
+
+        private bool HaveSameCustomerVersion(GetOrderDto current, GetOrderDto incoming)
+        {
+            return current.Customer.HasSameVersion(incoming.Customer);
         }
 
         private ComplexSearchableOrder CreateSearchableOrder()

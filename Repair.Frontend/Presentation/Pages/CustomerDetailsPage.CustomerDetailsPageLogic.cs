@@ -1,3 +1,4 @@
+using Repair.Frontend.Presentation.Factory;
 using Repair.Frontend.Services;
 using Repair.Models.Dto.Update;
 using Repair.Models.Dto.Get;
@@ -85,7 +86,7 @@ internal sealed partial class CustomerDetailsPage
 
         public void OrderClicked(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is not DataGrid dataGrid)
+            if (sender is not DataGrid dataGrid || dataGrid.IsUpdatingSelection())
             {
                 return;
             }
@@ -97,6 +98,8 @@ internal sealed partial class CustomerDetailsPage
 
             OrderDetailsPage.OrderDetailsPageArguments arguments =
                 GetArgumentsFactory().CreateOrderDetailsPageArguments(order.Id);
+            dataGrid.SelectedItem = null;
+
             var page = new OrderDetailsPage(arguments);
 
             ViewModel.Arguments.NavigationService.NavigateTo(page, "Order Details Page");

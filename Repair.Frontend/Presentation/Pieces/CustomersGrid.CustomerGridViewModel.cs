@@ -1,4 +1,5 @@
 using Repair.Models.Dto.Get;
+using Repair.Frontend.Presentation.Factory;
 using System.Collections.ObjectModel;
 using CommunityToolkit.WinUI.UI.Controls;
 
@@ -52,26 +53,37 @@ internal sealed partial class CustomersGrid
 
         partial void OnSelectedCustomerIdChanged(int value)
         {
-            GetCustomerDto? customer = Customers.FirstOrDefault(x => x.Id == value);
-
-            if (SelectedCustomer?.Id != customer?.Id)
-            {
-                SelectedCustomer = customer;
-            }
-
+            RestoreCustomerSelection();
             CustomerSelectionChanged?.Invoke(this, EventArgs.Empty);
         }
 
         partial void OnSelectedCustomerChanged(GetCustomerDto? value)
         {
-            int customerId = value?.Id ?? 0;
-
-            if (SelectedCustomerId == customerId)
+            if (DataGrid is not null && DataGrid.IsUpdatingSelection())
             {
                 return;
             }
 
-            SelectedCustomerId = customerId;
+            SelectedCustomerId = value?.Id ?? 0;
+        }
+
+        internal void RestoreCustomerSelection()
+        {
+            if (DataGrid is null)
+            {
+                return;
+            }
+
+            DataGrid.UpdateSelectionSafely(() =>
+            {
+                GetCustomerDto? visible = Customers.FirstOrDefault(x => x.Id == SelectedCustomerId);
+                if (visible is not null || SelectedCustomer?.Id != SelectedCustomerId)
+                {
+                    SelectedCustomer = visible;
+                }
+
+                DataGrid.SelectedItem = visible;
+            });
         }
     }
 }

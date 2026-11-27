@@ -193,7 +193,8 @@ internal sealed partial class OrdersGrid
         private DataGrid CreateOrderDataGrid()
         {
             ViewModel.DataGrid =
-                DataGridFactory.Create<OrderGridColumns>(ViewModel.Orders, GetColumnBindingPath, GetColumnConverter);
+                DataGridFactory.Create<OrderGridColumns, GetOrderDto>(ViewModel.Orders, GetColumnBindingPath,
+                    GetColumnConverter);
             ViewModel.DataGrid.Margin = new Thickness(4);
 
             return ViewModel.DataGrid;

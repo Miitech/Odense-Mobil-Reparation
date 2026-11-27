@@ -37,24 +37,23 @@ internal sealed partial class OrderEditor
         internal void RegisterCustomerSelectionIndicator()
         {
             ViewModel.CustomersGrid.ViewModel.PropertyChanged += CustomersGridViewModelPropertyChanged;
-            ViewModel.CustomersGrid.ViewModel.Customers.CollectionChanged += (_, _) => UpdateSelectedCustomerText();
 
             UpdateSelectedCustomerText();
         }
 
         private void CustomersGridViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(ViewModel.CustomersGrid.ViewModel.SelectedCustomerId))
+            if (e.PropertyName != nameof(ViewModel.CustomersGrid.ViewModel.SelectedCustomer))
+            {
                 return;
+            }
 
             UpdateSelectedCustomerText();
         }
 
         private void UpdateSelectedCustomerText()
         {
-            GetCustomerDto? customer =
-                ViewModel.CustomersGrid.ViewModel.Customers.FirstOrDefault(x =>
-                    x.Id == ViewModel.CustomersGrid.ViewModel.SelectedCustomerId);
+            GetCustomerDto? customer = ViewModel.CustomersGrid.ViewModel.SelectedCustomer;
 
             ViewModel.SelectedCustomerText = customer is null
                 ? "Current Selected Customer: Missing Selection"

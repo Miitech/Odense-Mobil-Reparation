@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using Repair.Abstractions.Entity.Metadata;
 using System.Collections;
 using System.ComponentModel;
 using CommunityToolkit.WinUI.UI.Controls;
@@ -8,9 +10,33 @@ namespace Repair.Frontend.Presentation.Factory;
 
 internal static class DataGridFactory
 {
-    public static DataGrid Create<TColumn>(
+    private static readonly HashSet<DataGrid> updatingGrids = [];
+
+    public static bool IsUpdatingSelection(this DataGrid grid)
+    {
+        return updatingGrids.Contains(grid);
+    }
+
+    public static void UpdateSelectionSafely(this DataGrid grid, Action update)
+    {
+        bool ownsUpdate = updatingGrids.Add(grid);
+        try
+        {
+            update();
+        }
+        finally
+        {
+            if (ownsUpdate)
+            {
+                updatingGrids.Remove(grid);
+            }
+        }
+    }
+
+    private static DataGrid Create<TColumn>(
         IEnumerable<object> itemsSource, Func<TColumn, string> getBindingPath,
-        Func<TColumn, IValueConverter?>? getColumnConverter = null) where TColumn : struct, Enum
+        Func<TColumn, IValueConverter?>? getColumnConverter = null, Action<DataGrid>? sortItems = null)
+        where TColumn : struct, Enum
     {
         var dataGrid = new DataGrid
         {
@@ -21,7 +47,7 @@ internal static class DataGridFactory
             Foreground = new SolidColorBrush(Colors.Black),
         };
 
-        dataGrid.Sorting += SortColumnClicked;
+        dataGrid.Sorting += (sender, args) => SortColumnClicked(sender, args, sortItems);
 
         foreach (TColumn column in Enum.GetValues<TColumn>())
         {
@@ -35,7 +61,27 @@ internal static class DataGridFactory
         return dataGrid;
     }
 
-    private static void SortColumnClicked(object? sender, DataGridColumnEventArgs e)
+    public static DataGrid Create<TColumn, TItem>(
+        ObservableCollection<TItem> itemsSource, Func<TColumn, string> getBindingPath,
+        Func<TColumn, IValueConverter?>? getColumnConverter = null)
+        where TColumn : struct, Enum where TItem : class, IEntityMetadata
+    {
+        return Create(itemsSource, getBindingPath, getColumnConverter, grid => SortItems(grid, itemsSource));
+    }
+
+    private static void SortItems<T>(DataGrid grid, ObservableCollection<T> items)
+        where T : class, IEntityMetadata
+    {
+        object? selectedItem = grid.SelectedItem;
+        List<T> sorted = grid.ApplyCurrentSort(items).ToList();
+        grid.UpdateSelectionSafely(() =>
+        {
+            items.SynchronizeItems(sorted);
+            grid.SelectedItem = selectedItem;
+        });
+    }
+
+    private static void SortColumnClicked(object? sender, DataGridColumnEventArgs e, Action<DataGrid>? sortItems)
     {
         if (sender is not DataGrid dataGrid)
         {
@@ -57,7 +103,13 @@ internal static class DataGridFactory
             }
         }
 
-        dataGrid.ApplyCurrentSort();
+        if (sortItems is null)
+        {
+            dataGrid.ApplyCurrentSort();
+            return;
+        }
+
+        sortItems(dataGrid);
     }
 
     private static void ApplyCurrentSort(this DataGrid dataGrid)
@@ -78,7 +130,7 @@ internal static class DataGridFactory
 
         if (sortedColumn?.Tag is not string bindingPath || sortedColumn.SortDirection is null)
         {
-            return items;
+            return items.OrderBy(x => (x as IEntityMetadata)?.Id);
         }
 
         return sortedColumn.SortDirection switch

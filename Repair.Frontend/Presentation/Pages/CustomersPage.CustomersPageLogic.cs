@@ -1,3 +1,4 @@
+using Repair.Frontend.Presentation.Factory;
 using Repair.Models.Dto.Get;
 using System.ComponentModel;
 using CommunityToolkit.WinUI.UI.Controls;
@@ -30,7 +31,7 @@ internal sealed partial class CustomersPage
 
         public void CustomerClicked(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is not DataGrid dataGrid)
+            if (sender is not DataGrid dataGrid || dataGrid.IsUpdatingSelection())
             {
                 return;
             }
@@ -43,10 +44,11 @@ internal sealed partial class CustomersPage
             CustomerDetailsPage.CustomerDetailsPageArguments arguments =
                 GetArgumentsFactory().CreateCustomerDetailsPageArguments(customer.Id);
 
+            dataGrid.SelectedItem = null;
+
             var detailPage = new CustomerDetailsPage(arguments);
             navigationService.NavigateTo(detailPage, "Customer Details Page");
 
-            dataGrid.SelectedItem = null;
         }
     }
 }

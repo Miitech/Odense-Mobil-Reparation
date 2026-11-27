@@ -1,3 +1,4 @@
+using Repair.Frontend.Presentation.Factory;
 using Repair.Models.Dto.Get;
 using CommunityToolkit.WinUI.UI.Controls;
 using Repair.Frontend.Abstraction;
@@ -18,7 +19,7 @@ internal sealed partial class OrdersPage
 
         internal void OrderClicked(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is not DataGrid dataGrid)
+            if (sender is not DataGrid dataGrid || dataGrid.IsUpdatingSelection())
             {
                 return;
             }
@@ -31,10 +32,11 @@ internal sealed partial class OrdersPage
             OrderDetailsPage.OrderDetailsPageArguments arguments =
                 GetArgumentsFactory().CreateOrderDetailsPageArguments(order.Id);
 
+            dataGrid.SelectedItem = null;
+
             var detailPage = new OrderDetailsPage(arguments);
             navigationService.NavigateTo(detailPage, "Order Details Page");
 
-            dataGrid.SelectedItem = null;
         }
 
         internal void CreateOrderClicked(object sender, RoutedEventArgs e)

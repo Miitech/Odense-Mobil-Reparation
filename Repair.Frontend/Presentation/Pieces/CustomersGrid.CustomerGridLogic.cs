@@ -50,8 +50,6 @@ internal sealed partial class CustomersGrid
         {
             try
             {
-                RememberSelectedCustomer();
-
                 ComplexSearchableCustomer searchable = CreateSearchableCustomer();
 
                 List<GetCustomerDto> customers = (await customerApi.SearchComplex(searchable)).ToList();
@@ -70,8 +68,6 @@ internal sealed partial class CustomersGrid
 
         private void ApplySearchResults(List<GetCustomerDto> customers, CancellationToken cancellationToken)
         {
-            customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
-
             logger.LogInformation("Customer search returned {CustomerCount} customers. Fuzzy search: {UseFuzzySearch}",
                 customers.Count, ViewModel.UseFuzzySearch);
 
@@ -91,29 +87,26 @@ internal sealed partial class CustomersGrid
             logger.LogDebug("Updating Customers collection. Existing count: {ExistingCount}",
                 ViewModel.Customers.Count);
 
-            ViewModel.Customers.ReplaceItems(customers);
-            ViewModel.DataGrid.Refresh();
-
-            RestoreSelectedCustomer();
+            customers = ViewModel.DataGrid.ApplyCurrentSort(customers).ToList();
+            ViewModel.DataGrid.UpdateSelectionSafely(() =>
+            {
+                ViewModel.Customers.SynchronizeItems(customers);
+                ViewModel.RestoreCustomerSelection();
+            });
 
             logger.LogDebug(
                 "Customers collection updated. New count: {NewCount}, SelectedCustomerId: {SelectedCustomerId}, SelectedCustomer: '{SelectedCustomerName}'",
                 ViewModel.Customers.Count, ViewModel.SelectedCustomerId, ViewModel.SelectedCustomer?.Name);
         }
 
-        private void RememberSelectedCustomer()
+        internal void CustomerSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ViewModel.SelectedCustomer is null)
+            if (ViewModel.DataGrid.IsUpdatingSelection())
             {
                 return;
             }
 
-            ViewModel.SelectedCustomerId = ViewModel.SelectedCustomer.Id;
-        }
-
-        private void RestoreSelectedCustomer()
-        {
-            ViewModel.SelectedCustomer = ViewModel.Customers.FirstOrDefault(x => x.Id == ViewModel.SelectedCustomerId);
+            ViewModel.SelectedCustomer = ViewModel.DataGrid.SelectedItem as GetCustomerDto;
         }
 
         private ComplexSearchableCustomer CreateSearchableCustomer()
