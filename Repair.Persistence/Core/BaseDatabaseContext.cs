@@ -7,49 +7,57 @@ namespace Repair.Persistence.Core;
 
 public abstract class BaseDatabaseContext<TContext> : DbContext where TContext : DbContext
 {
-    private readonly DbContextOptions options;
-
     protected BaseDatabaseContext([NotNull] DbContextOptions<TContext> options) : base(options)
     {
-        this.options = options;
-    }
-
-    public override int SaveChanges()
-    {
-        UpdateDatetime();
-        return base.SaveChanges();
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        UpdateDatetime();
+        UpdateEntityMetadata();
         return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        UpdateDatetime();
-        return base.SaveChangesAsync(cancellationToken);
     }
 
     public override Task<int> SaveChangesAsync(
         bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        UpdateDatetime();
+        UpdateEntityMetadata();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    private void UpdateDatetime()
+    private void UpdateEntityMetadata()
     {
-        var entries = ChangeTracker.Entries()
-            .Where(e => e is { Entity: IEntity, State: EntityState.Added or EntityState.Modified, });
+        var entries = ChangeTracker.Entries<IEntity>()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified);
+        var now = DateTime.UtcNow;
+        var generateVersion = Database.IsSqlite();
 
-        foreach (EntityEntry entityEntry in entries)
+        foreach (var entry in entries)
         {
-            ((IEntity)entityEntry.Entity).UpdatedDateTime = DateTime.UtcNow;
+            UpdateDateTime(entry, now);
 
-            if (entityEntry.State == EntityState.Added)
-                ((IEntity)entityEntry.Entity).CreatedDateTime = DateTime.UtcNow;
+            if (generateVersion)
+            {
+                UpdateVersion(entry);
+            }
         }
+    }
+
+    private void UpdateDateTime(EntityEntry<IEntity> entry, DateTime now)
+    {
+        entry.Entity.UpdatedDateTime = now;
+
+        if (entry.State == EntityState.Added)
+        {
+            entry.Entity.CreatedDateTime = now;
+        }
+    }
+
+    private void UpdateVersion(EntityEntry<IEntity> entry)
+    {
+        var version = entry.Property(x => x.Version);
+        version.CurrentValue = Guid.NewGuid().ToByteArray();
+
+        if (entry.State == EntityState.Modified)
+            version.IsModified = true;
     }
 }
