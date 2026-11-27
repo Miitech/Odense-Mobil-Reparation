@@ -84,7 +84,7 @@ internal sealed partial class OrderEditor
 
         private TextBox CreateBorrowedPhoneTextBox()
         {
-            ViewModel.BorrowedPhoneTextBox = TextBoxFactory.CreateSearchBox("Borrowed phone?", "Borrowed phone...",
+            ViewModel.BorrowedPhoneTextBox = TextBoxFactory.CreateSearchBox("Borrowed device?", "Borrowed device...",
                 nameof(OrderEditorViewModel.BorrowedPhone));
 
             return ViewModel.BorrowedPhoneTextBox;

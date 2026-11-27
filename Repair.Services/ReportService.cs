@@ -30,8 +30,8 @@ public class ReportService(
     private const string ORDER_DETAILS_HEADER = "Ordreoplysninger";
     private const string HANDED_IN_LABEL = "Indleveret";
     private const string RETURNED_LABEL = "Udleveret";
-    private const string BORROWED_PHONE_HEADER = "Lånetelefon";
-    private const string NO_BORROWED_PHONE = "Ingen lånetelefon";
+    private const string BORROWED_PHONE_HEADER = "Låneenhed";
+    private const string NO_BORROWED_PHONE = "Ingen låneenhed";
     private const string HAND_IN_WHAT_HEADER = "Indleveret";
     private const string REPAIR_NOTES_HEADER = "Reparationsnoter";
     private const string NO_DATE_TIME_SET = "Ingen dato/tid angivet";

@@ -158,8 +158,8 @@ internal sealed partial class OrdersGrid
 
         private TextBox CreateBorrowedPhoneSearchBox()
         {
-            ViewModel.BorrowedPhoneSearchBox = TextBoxFactory.CreateSearchBox("Borrowed phone",
-                "Search borrowed phone...", nameof(OrdersGridViewModel.BorrowedPhoneSearchText));
+            ViewModel.BorrowedPhoneSearchBox = TextBoxFactory.CreateSearchBox("Borrowed device",
+                "Search borrowed device...", nameof(OrdersGridViewModel.BorrowedPhoneSearchText));
 
             return ViewModel.BorrowedPhoneSearchBox;
         }
@@ -208,7 +208,7 @@ internal sealed partial class OrdersGrid
                 OrderGridColumns.HANDED_IN_WHEN => nameof(GetOrderDto.HandInWhen),
                 OrderGridColumns.RETURNED_WHEN => nameof(GetOrderDto.ReturnedWhen),
                 OrderGridColumns.IS_ORDER_COMPLETE => nameof(GetOrderDto.IsOrderComplete),
-                OrderGridColumns.BORROWED_PHONE => nameof(GetOrderDto.BorrowedPhone),
+                OrderGridColumns.BORROWED_DEVICE => nameof(GetOrderDto.BorrowedPhone),
                 OrderGridColumns.CUSTOMER_NAME => $"{nameof(GetOrderDto.Customer)}.{nameof(GetCustomerDto.Name)}",
                 var _ => throw new ArgumentOutOfRangeException(nameof(column), column, null),
             };
@@ -221,7 +221,7 @@ internal sealed partial class OrdersGrid
                 OrderGridColumns.HANDED_IN_WHEN => new DateTimeConverter("No Date/Time Set"),
                 OrderGridColumns.RETURNED_WHEN => new DateTimeConverter("No Date/Time Set"),
                 OrderGridColumns.IS_ORDER_COMPLETE => new BooleanConverter(),
-                OrderGridColumns.BORROWED_PHONE => new NullableStringConverter("No Borrowed Phone"),
+                OrderGridColumns.BORROWED_DEVICE => new NullableStringConverter("No Borrowed Device"),
                 var _ => null,
             };
         }
@@ -233,7 +233,7 @@ internal sealed partial class OrdersGrid
             HANDED_IN_WHEN = 2,
             RETURNED_WHEN = 3,
             IS_ORDER_COMPLETE = 4,
-            BORROWED_PHONE = 5,
+            BORROWED_DEVICE = 5,
             CUSTOMER_NAME = 6,
         }
     }
