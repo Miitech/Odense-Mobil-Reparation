@@ -1,4 +1,5 @@
 using Repair.Frontend.Extensions;
+using Repair.Frontend.Presentation.Converters;
 
 namespace Repair.Frontend.Presentation.Factory;
 
@@ -80,10 +81,51 @@ internal static class TextBoxFactory
     {
         Grid inputGrid = GridFactory.CreateDefaultGrid();
 
+        inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
         inputGrid.Children.Add(CreatePlaceholderTextBlock(textBox));
         inputGrid.Children.Add(CreateContentElement());
+        inputGrid.Children.Add(CreateClearButton(textBox));
 
         return inputGrid;
+    }
+
+    private static Button CreateClearButton(TextBox textBox)
+    {
+        Button button = ButtonFactory.CreateClearButton();
+
+        Grid.SetColumn(button, 1);
+        button.SetBinding(UIElement.VisibilityProperty, CreateClearButtonVisibilityBinding(textBox));
+        button.SetBinding(Control.IsEnabledProperty, CreateClearButtonEnabledBinding(textBox));
+        button.Click += (_, _) => ClearText(textBox);
+
+        return button;
+    }
+
+    private static void ClearText(TextBox textBox)
+    {
+        if (!textBox.IsEnabled || textBox.IsReadOnly)
+            return;
+
+        textBox.Text = string.Empty;
+        textBox.Focus(FocusState.Programmatic);
+    }
+
+    private static Binding CreateClearButtonVisibilityBinding(TextBox textBox)
+    {
+        Binding binding = CreateTemplateBinding(textBox, nameof(TextBox.Text));
+        binding.Converter = new NonEmptyTextToVisibilityConverter();
+
+        return binding;
+    }
+
+    private static Binding CreateClearButtonEnabledBinding(TextBox textBox)
+    {
+        Binding binding = CreateTemplateBinding(textBox, nameof(TextBox.IsReadOnly));
+        binding.Converter = new ReadOnlyToEnabledConverter();
+
+        return binding;
     }
 
     private static TextBlock CreatePlaceholderTextBlock(TextBox textBox)
@@ -152,34 +194,5 @@ internal static class TextBoxFactory
         binding.Converter = new EmptyTextToVisibilityConverter();
 
         return binding;
-    }
-
-
-    private sealed class EmptyTextToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            return string.IsNullOrEmpty(value as string) ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotSupportedException();
-        }
-    }
-
-    private sealed class FocusStateToBorderBrushConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            return value is FocusState.Unfocused
-                ? new SolidColorBrush(Colors.Black)
-                : new SolidColorBrush(Colors.DodgerBlue);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotSupportedException();
-        }
     }
 }

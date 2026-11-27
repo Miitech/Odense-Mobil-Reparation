@@ -4,6 +4,27 @@ namespace Repair.Frontend.Presentation.Factory
 {
     public static class ButtonFactory
     {
+        public static Button CreateClearButton()
+        {
+            Button button = new()
+            {
+                Content = "×",
+                FontSize = 20,
+                Foreground = new SolidColorBrush(Colors.Black),
+                Background = new SolidColorBrush(Colors.Transparent),
+                BorderThickness = new Thickness(0),
+                Padding = new Thickness(4, 0, 4, 0),
+                MinWidth = 28,
+                MinHeight = 28,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(button, "Clear text");
+            ToolTipService.SetToolTip(button, "Clear text");
+
+            return button;
+        }
+
         public static HyperlinkButton BuildHyperlinkButton(string url)
         {
             Uri.TryCreate(url, UriKind.Absolute, out Uri? uri);
