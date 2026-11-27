@@ -15,6 +15,37 @@ public class CustomerQueryServiceTests
     public class GetEntitiesComplex : BaseDatabaseTest
     {
         [Test]
+        public async Task ReturnsUpdatedVersionAfterModification()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync();
+
+            await using RepairDatabaseContext readContext = CreateContext();
+            var service = new CustomerQueryService(readContext);
+            ComplexSearchableCustomer searchable = new() {Phone = "12345678",};
+            Customer original = (await service.GetEntitiesComplex(searchable)).Single();
+            byte[] originalVersion = original.Version.ToArray();
+            customer.Name = "Updated André";
+            await new CustomerQueryService(context).UpdateEntity(customer);
+
+            // Act
+            await using RepairDatabaseContext updatedContext = CreateContext();
+            var updatedService = new CustomerQueryService(updatedContext);
+            Customer updated = (await updatedService.GetEntitiesComplex(searchable)).Single();
+
+            // Assert
+            updated.Name.Should().Be("Updated André");
+            updated.Version.Should().NotBeNullOrEmpty();
+            updated.Version.Should().NotEqual(originalVersion);
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            Customer persisted = await verificationContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            updated.Version.Should().Equal(persisted.Version);
+        }
+
+        [Test]
         public async Task WithName_ReturnsMatchesAndIgnoresCasing()
         {
             await using RepairDatabaseContext context = CreateContext();
@@ -100,6 +131,31 @@ public class CustomerQueryServiceTests
 
     public class GetEntity : BaseDatabaseTest
     {
+        [Test]
+        public async Task PreservesVersionAcrossReads()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync();
+            byte[] originalVersion = customer.Version.ToArray();
+            SearchableCustomer searchable = new() {Id = customer.Id,};
+
+            // Act
+            await using RepairDatabaseContext firstContext = CreateContext();
+            Customer? first = await new CustomerQueryService(firstContext).GetEntity(searchable);
+            await using RepairDatabaseContext secondContext = CreateContext();
+            Customer? second = await new CustomerQueryService(secondContext).GetEntity(searchable);
+
+            // Assert
+            originalVersion.Should().NotBeNullOrEmpty();
+            first.Should().NotBeNull();
+            second.Should().NotBeNull();
+            first!.Version.Should().Equal(originalVersion);
+            second!.Version.Should().Equal(originalVersion);
+        }
+
         [Test]
         public async Task WithMatchingId_ReturnsCustomer()
         {
@@ -375,6 +431,24 @@ public class CustomerQueryServiceTests
     public class AddEntity : BaseDatabaseTest
     {
         [Test]
+        public async Task GeneratesVersion()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            var service = new CustomerQueryService(context);
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+
+            // Act
+            await service.AddEntity(customer);
+
+            // Assert
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            Customer persisted = await verificationContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            persisted.Version.Should().NotBeNullOrEmpty();
+            customer.Version.Should().Equal(persisted.Version);
+        }
+
+        [Test]
         public async Task WithSaveImmediatelyTrue_PersistsCustomer()
         {
             // Arrange
@@ -420,6 +494,28 @@ public class CustomerQueryServiceTests
     public class AddEntities : BaseDatabaseTest
     {
         [Test]
+        public async Task GeneratesVersions()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            var service = new CustomerQueryService(context);
+            Customer[] entities = [EntityFactory.CreateCustomer("André", "12345678", "andre@example.com"), EntityFactory.CreateCustomer("Sofie", "87654321", "sofie@example.com")];
+
+            // Act
+            await service.AddEntities(entities);
+
+            // Assert
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            var persisted = await verificationContext.Customers.ToListAsync();
+            persisted.Should().HaveCount(2);
+            foreach (Customer item in persisted)
+            {
+                item.Version.Should().NotBeNullOrEmpty();
+                entities.Single(x => x.Id == item.Id).Version.Should().Equal(item.Version);
+            }
+        }
+
+        [Test]
         public async Task PersistsCustomers()
         {
             // Arrange
@@ -442,6 +538,127 @@ public class CustomerQueryServiceTests
 
     public class UpdateEntity : BaseDatabaseTest
     {
+        [Test]
+        public async Task ChangesVersionOnConsecutiveUpdates()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync();
+            byte[] originalVersion = customer.Version.ToArray();
+            var service = new CustomerQueryService(context);
+
+            // Act
+            customer.Name = "Updated André";
+            await service.UpdateEntity(customer);
+            byte[] firstVersion = customer.Version.ToArray();
+            await using RepairDatabaseContext firstContext = CreateContext();
+            Customer first = await firstContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            customer.Name = "Final André";
+            await service.UpdateEntity(customer);
+
+            // Assert
+            firstVersion.Should().NotBeNullOrEmpty();
+            firstVersion.Should().NotEqual(originalVersion);
+            first.Version.Should().Equal(firstVersion);
+            first.Name.Should().Be("Updated André");
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            Customer persisted = await verificationContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            persisted.Name.Should().Be("Final André");
+            persisted.Version.Should().NotBeNullOrEmpty();
+            persisted.Version.Should().NotEqual(firstVersion);
+            persisted.Version.Should().NotEqual(originalVersion);
+            customer.Version.Should().Equal(persisted.Version);
+        }
+
+        [Test]
+        public async Task WithStaleTrackedEntity_ThrowsConcurrencyException()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync();
+            await using RepairDatabaseContext staleContext = CreateContext();
+            Customer stale = await staleContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            byte[] staleVersion = stale.Version.ToArray();
+            customer.Name = "Updated André";
+            await new CustomerQueryService(context).UpdateEntity(customer);
+            byte[] updatedVersion = customer.Version.ToArray();
+            stale.Name = "Final André";
+            var service = new CustomerQueryService(staleContext);
+
+            // Act
+            Func<Task> act = () => service.UpdateEntity(stale);
+
+            // Assert
+            updatedVersion.Should().NotEqual(staleVersion);
+            await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            Customer persisted = await verificationContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            persisted.Name.Should().Be("Updated André");
+            persisted.Version.Should().Equal(updatedVersion);
+        }
+
+        [Test]
+        public async Task WithStaleDetachedEntity_ThrowsConcurrencyException()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync();
+            await using RepairDatabaseContext staleContext = CreateContext();
+            Customer stale = await staleContext.Customers.AsNoTracking().SingleAsync(x => x.Id == customer.Id);
+            byte[] staleVersion = stale.Version.ToArray();
+            customer.Name = "Updated André";
+            await new CustomerQueryService(context).UpdateEntity(customer);
+            byte[] updatedVersion = customer.Version.ToArray();
+            stale.Name = "Final André";
+            var service = new CustomerQueryService(staleContext);
+
+            // Act
+            Func<Task> act = () => service.UpdateEntity(stale);
+
+            // Assert
+            updatedVersion.Should().NotEqual(staleVersion);
+            await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            Customer persisted = await verificationContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            persisted.Name.Should().Be("Updated André");
+            persisted.Version.Should().Equal(updatedVersion);
+        }
+
+        [Test]
+        public async Task ChangesVersionAndPreservesUnrelatedVersion()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer customer = EntityFactory.CreateCustomer("André", "12345678", "andre@example.com");
+            Customer other = EntityFactory.CreateCustomer("Sofie", "87654321", "sofie@example.com");
+            context.Customers.AddRange(customer, other);
+            await context.SaveChangesAsync();
+
+            await using RepairDatabaseContext beforeContext = CreateContext();
+            var before = await beforeContext.Customers.ToDictionaryAsync(x => x.Id, x => x.Version.ToArray());
+            var service = new CustomerQueryService(context);
+            customer.Name = "Updated André";
+
+            // Act
+            await service.UpdateEntity(customer);
+
+            // Assert
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            Customer updated = await verificationContext.Customers.SingleAsync(x => x.Id == customer.Id);
+            Customer unchanged = await verificationContext.Customers.SingleAsync(x => x.Id == other.Id);
+            updated.Name.Should().Be("Updated André");
+            updated.Version.Should().NotBeNullOrEmpty();
+            updated.Version.Should().NotEqual(before[customer.Id]);
+            customer.Version.Should().Equal(updated.Version);
+            unchanged.Version.Should().Equal(before[other.Id]);
+        }
+
         [Test]
         public async Task UpdatesCustomer()
         {
@@ -467,6 +684,36 @@ public class CustomerQueryServiceTests
 
     public class UpdateEntities : BaseDatabaseTest
     {
+        [Test]
+        public async Task ChangesVersions()
+        {
+            // Arrange
+            await using RepairDatabaseContext context = CreateContext();
+            Customer[] entities = [EntityFactory.CreateCustomer("André", "12345678", "andre@example.com"), EntityFactory.CreateCustomer("Sofie", "87654321", "sofie@example.com")];
+            context.Customers.AddRange(entities);
+            await context.SaveChangesAsync();
+
+            await using RepairDatabaseContext beforeContext = CreateContext();
+            var before = await beforeContext.Customers.ToDictionaryAsync(x => x.Id, x => x.Version.ToArray());
+            var service = new CustomerQueryService(context);
+            foreach (Customer item in entities)
+                item.Name += " Updated";
+
+            // Act
+            await service.UpdateEntities(entities);
+
+            // Assert
+            await using RepairDatabaseContext verificationContext = CreateContext();
+            var updated = await verificationContext.Customers.ToListAsync();
+            updated.Should().HaveCount(2);
+            foreach (Customer item in updated)
+            {
+                item.Version.Should().NotBeNullOrEmpty();
+                item.Version.Should().NotEqual(before[item.Id]);
+                entities.Single(x => x.Id == item.Id).Version.Should().Equal(item.Version);
+            }
+        }
+
         [Test]
         public async Task UpdatesCustomers()
         {
